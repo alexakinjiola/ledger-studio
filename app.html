@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger Studio — Invoice Generator</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ SITE NAV ============ -->
+<nav class="site-nav">
+  <a href="index.html" class="site-nav-brand">
+    <span class="site-nav-mark">§</span>
+    <span>Ledger Studio</span>
+  </a>
+  <div class="site-nav-links">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="app.html" class="site-nav-active">Create invoice</a>
+  </div>
+  <button class="site-nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+
+<!-- ============ INTRO CURTAIN ============ -->
+<div class="curtain" id="curtain">
+  <div class="curtain-mark">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <circle cx="36" cy="36" r="34" stroke="#C9A227" stroke-width="1.5"/>
+      <path d="M22 38 L32 48 L50 24" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="curtain-check"/>
+    </svg>
+  </div>
+  <p class="curtain-label">LEDGER STUDIO</p>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div class="shell">
+
+  <!-- ===== LEFT: CONTROL PANEL ===== -->
+  <aside class="panel">
+    <header class="panel-head">
+      <div class="brand">
+        <span class="brand-mark">§</span>
+        <div>
+          <p class="brand-name">Ledger Studio</p>
+          <p class="brand-sub">Invoice Generator</p>
+        </div>
+      </div>
+      <button class="ghost-btn" id="resetBtn" title="Start a fresh invoice">Reset</button>
+    </header>
+
+    <div class="panel-scroll">
+
+      <!-- FROM -->
+      <section class="field-group" style="--d:0">
+        <h2 class="group-title"><span class="group-index">From</span>Your details</h2>
+        <div class="field">
+          <label for="fromName">Business or your name</label>
+          <input id="fromName" placeholder="Alexa Kinjiola Studio" autocomplete="off">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="fromEmail">Email</label>
+            <input id="fromEmail" placeholder="hello@studio.com" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="fromPhone">Phone</label>
+            <input id="fromPhone" placeholder="+234 800 000 0000" autocomplete="off">
+          </div>
+        </div>
+        <div class="field">
+          <label for="fromAddress">Address</label>
+          <input id="fromAddress" placeholder="Lagos, Nigeria" autocomplete="off">
+        </div>
+      </section>
+
+      <!-- TO -->
+      <section class="field-group" style="--d:1">
+        <h2 class="group-title"><span class="group-index">To</span>Bill client</h2>
+        <div class="field">
+          <label for="toName">Client name</label>
+          <input id="toName" placeholder="Client or company name" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="toEmail">Client email</label>
+          <input id="toEmail" placeholder="client@company.com" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="toAddress">Client address</label>
+          <input id="toAddress" placeholder="City, country" autocomplete="off">
+        </div>
+      </section>
+
+      <!-- INVOICE META -->
+      <section class="field-group" style="--d:2">
+        <h2 class="group-title"><span class="group-index">Details</span>Invoice info</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="invNumber">Invoice number</label>
+            <input id="invNumber" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="currency">Currency</label>
+            <select id="currency">
+              <option value="₦">₦ NGN</option>
+              <option value="$">$ USD</option>
+              <option value="€">€ EUR</option>
+              <option value="£">£ GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="invDate">Issue date</label>
+            <input id="invDate" type="date">
+          </div>
+          <div class="field">
+            <label for="dueDate">Due date</label>
+            <input id="dueDate" type="date">
+          </div>
+        </div>
+      </section>
+
+      <!-- LINE ITEMS -->
+      <section class="field-group" style="--d:3">
+        <h2 class="group-title"><span class="group-index">Items</span>Work performed</h2>
+        <div id="itemsList" class="items-list"></div>
+        <button class="add-item-btn" id="addItemBtn">
+          <span class="plus">+</span> Add line item
+        </button>
+      </section>
+
+      <!-- ADJUSTMENTS -->
+      <section class="field-group" style="--d:4">
+        <h2 class="group-title"><span class="group-index">Totals</span>Tax &amp; discount</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="taxRate">Tax rate (%)</label>
+            <input id="taxRate" type="number" min="0" step="0.1" value="0">
+          </div>
+          <div class="field">
+            <label for="discountRate">Discount (%)</label>
+            <input id="discountRate" type="number" min="0" step="0.1" value="0">
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTES -->
+      <section class="field-group" style="--d:5">
+        <h2 class="group-title"><span class="group-index">Note</span>Terms &amp; message</h2>
+        <div class="field">
+          <label for="notes">Payment terms or thank-you note</label>
+          <textarea id="notes" rows="3" placeholder="Payment due within 14 days. Thank you for your business.">Payment due within 14 days. Thank you for your business.</textarea>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="panel-foot">
+      <button class="primary-btn" id="generateBtn">
+        <span>Generate invoice</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="secondary-btn" id="downloadBtn">Download as PDF</button>
+    </footer>
+  </aside>
+
+  <!-- ===== RIGHT: LIVE PREVIEW ===== -->
+  <main class="stage">
+    <div class="stage-inner">
+      <div class="paper" id="paper">
+
+        <svg class="foil-frame" viewBox="0 0 800 1040" preserveAspectRatio="none">
+          <rect x="14" y="14" width="772" height="1012" rx="2" class="foil-rect"/>
+        </svg>
+
+        <div class="seal" id="seal">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="56" class="seal-ring"/>
+            <circle cx="60" cy="60" r="46" class="seal-ring-inner"/>
+            <text x="60" y="55" text-anchor="middle" class="seal-text">PAID IN</text>
+            <text x="60" y="72" text-anchor="middle" class="seal-text">FULL TRUST</text>
+          </svg>
+        </div>
+
+        <header class="paper-head">
+          <div class="paper-brand">
+            <span class="paper-mark">§</span>
+            <p class="paper-from-name" id="pFromName">Your Business Name</p>
+            <p class="paper-from-detail" id="pFromEmail">hello@studio.com</p>
+            <p class="paper-from-detail" id="pFromPhone">+234 800 000 0000</p>
+            <p class="paper-from-detail" id="pFromAddress">Lagos, Nigeria</p>
+          </div>
+          <div class="paper-invoice-meta">
+            <p class="invoice-word">Invoice</p>
+            <p class="meta-row"><span>No.</span><b id="pInvNumber">—</b></p>
+            <p class="meta-row"><span>Issued</span><b id="pInvDate">—</b></p>
+            <p class="meta-row"><span>Due</span><b id="pDueDate">—</b></p>
+          </div>
+        </header>
+
+        <div class="paper-divider"></div>
+
+        <section class="paper-bill-to">
+          <p class="bill-to-label">Billed to</p>
+          <p class="bill-to-name" id="pToName">Client name</p>
+          <p class="bill-to-detail" id="pToEmail"></p>
+          <p class="bill-to-detail" id="pToAddress"></p>
+        </section>
+
+        <table class="paper-table">
+          <thead>
+            <tr>
+              <th class="col-desc">Description</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-rate">Rate</th>
+              <th class="col-amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="pItemsBody"></tbody>
+        </table>
+
+        <section class="paper-totals">
+          <div class="totals-inner">
+            <div class="totals-row"><span>Subtotal</span><b id="pSubtotal">₦0.00</b></div>
+            <div class="totals-row" id="pDiscountRow"><span>Discount</span><b id="pDiscount">− ₦0.00</b></div>
+            <div class="totals-row" id="pTaxRow"><span>Tax</span><b id="pTax">₦0.00</b></div>
+            <div class="totals-row total-final"><span>Total due</span><b id="pTotal">₦0.00</b></div>
+          </div>
+        </section>
+
+        <div class="paper-divider thin"></div>
+
+        <footer class="paper-foot">
+          <p class="foot-label">Notes</p>
+          <p class="foot-note" id="pNotes">Payment due within 14 days. Thank you for your business.</p>
+        </footer>
+
+        <p class="paper-watermark">LEDGER STUDIO</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Row template (cloned by JS) -->
+<template id="rowTemplate">
+  <div class="item-row">
+    <input class="item-desc" placeholder="Website design &amp; development" autocomplete="off">
+    <input class="item-qty" type="number" min="0" step="1" value="1">
+    <input class="item-rate" type="number" min="0" step="0.01" value="0">
+    <span class="item-amount">₦0.00</span>
+    <button class="item-remove" title="Remove item" aria-label="Remove item">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</template>
+
+<script src="main.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

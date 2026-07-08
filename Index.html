@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger Studio — Invoices your clients take seriously</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-marketing">
+
+<!-- ============ SITE NAV ============ -->
+<nav class="site-nav">
+  <a href="index.html" class="site-nav-brand">
+    <span class="site-nav-mark">§</span>
+    <span>Ledger Studio</span>
+  </a>
+  <div class="site-nav-links">
+    <a href="index.html" class="site-nav-active">Home</a>
+    <a href="about.html">About</a>
+    <a href="app.html">Create invoice</a>
+  </div>
+  <button class="site-nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-copy" data-reveal>
+      <p class="eyebrow">Invoicing, done properly</p>
+      <h1 class="hero-title">Send invoices your<br>clients take seriously.</h1>
+      <p class="hero-sub">
+        Ledger Studio turns a plain list of line items into a paper-crisp,
+        gold-foiled invoice in real time — fill in a field on the left,
+        watch it appear on the right. No account, no software to install,
+        no invoice that looks like everyone else's.
+      </p>
+      <div class="hero-actions">
+        <a href="app.html" class="primary-btn hero-cta">
+          <span>Create your invoice</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="about.html" class="text-link">Why we built this →</a>
+      </div>
+      <p class="hero-note">Free to use. Your data stays on your device.</p>
+    </div>
+
+    <!-- signature element: live-feeling mini invoice mockup -->
+    <div class="hero-mock-wrap" data-reveal>
+      <div class="hero-mock">
+        <svg class="foil-frame" viewBox="0 0 800 1040" preserveAspectRatio="none">
+          <rect x="14" y="14" width="772" height="1012" rx="2" class="foil-rect"/>
+        </svg>
+        <div class="mock-head">
+          <div>
+            <span class="mock-mark">§</span>
+            <p class="mock-brand">Adire &amp; Co.</p>
+            <p class="mock-detail">studio@adireandco.com</p>
+          </div>
+          <div class="mock-meta">
+            <p class="mock-invoice-word">Invoice</p>
+            <p class="mock-row"><span>No.</span><b>INV-2026-0417</b></p>
+            <p class="mock-row"><span>Due</span><b>21 Jul 2026</b></p>
+          </div>
+        </div>
+        <div class="mock-divider"></div>
+        <div class="mock-line"><span>Brand identity &amp; logo suite</span><b>₦180,000.00</b></div>
+        <div class="mock-line"><span>Packaging design — 3 SKUs</span><b>₦95,000.00</b></div>
+        <div class="mock-line mock-line-in"><span>Launch social templates</span><b>₦60,000.00</b></div>
+        <div class="mock-divider thin"></div>
+        <div class="mock-total">
+          <span>Total due</span>
+          <b id="mockTotal">₦0.00</b>
+        </div>
+        <div class="mock-seal">
+          <svg width="72" height="72" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="56" class="seal-ring"/>
+            <circle cx="60" cy="60" r="46" class="seal-ring-inner"/>
+            <text x="60" y="55" text-anchor="middle" class="seal-text">PAID IN</text>
+            <text x="60" y="72" text-anchor="middle" class="seal-text">FULL TRUST</text>
+          </svg>
+        </div>
+      </div>
+      <div class="hero-mock-shadow" aria-hidden="true"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section" id="how">
+  <div class="section-inner">
+    <p class="eyebrow center" data-reveal>How it works</p>
+    <h2 class="section-title center" data-reveal>From blank form to sent invoice, in three steps.</h2>
+
+    <div class="steps">
+      <div class="step" data-reveal>
+        <span class="step-index">01</span>
+        <h3>Fill in your details</h3>
+        <p>Your business, your client, and what you did for them. Everything autosaves as you go.</p>
+      </div>
+      <div class="step" data-reveal>
+        <span class="step-index">02</span>
+        <h3>Watch it build itself</h3>
+        <p>A gold-foiled invoice assembles on the right in real time — totals, tax, and discount included.</p>
+      </div>
+      <div class="step" data-reveal>
+        <span class="step-index">03</span>
+        <h3>Download and send</h3>
+        <p>One click turns it into a clean PDF, ready to attach to an email or share with your client.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section section-alt" id="features">
+  <div class="section-inner">
+    <p class="eyebrow center" data-reveal>Built for the work, not the paperwork</p>
+    <h2 class="section-title center" data-reveal>Everything an invoice needs. Nothing it doesn't.</h2>
+
+    <div class="feature-grid">
+      <article class="feature-card" data-reveal>
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3" y="3" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.4"/><path d="M8 13h10M8 9h6M8 17h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <h3>Live preview</h3>
+        <p>No "generate" button to guess at. The finished invoice updates as you type each field.</p>
+      </article>
+      <article class="feature-card" data-reveal>
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3v20M6 8c0-2.5 3-3 7-3s7 .8 7 3-3 2.7-7 3-7 .5-7 3 3 3 7 3 7-.5 7-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <h3>Tax &amp; discount, built in</h3>
+        <p>Set a rate once and every total recalculates instantly — subtotal, discount, tax, and the number that matters.</p>
+      </article>
+      <article class="feature-card" data-reveal>
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M6 3h10l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M13 12v7m0 0l-3-3m3 3l3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>One-click PDF</h3>
+        <p>Download a clean, print-ready PDF straight from the browser — no extra software, no watermark.</p>
+      </article>
+      <article class="feature-card" data-reveal>
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="7" y="2" width="12" height="22" rx="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M12 20h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <h3>Made for any screen</h3>
+        <p>Draft an invoice on your laptop, tweak the total on your phone before a meeting. It keeps up.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA BANNER ============ -->
+<section class="cta-banner">
+  <div class="cta-banner-inner" data-reveal>
+    <h2>Your next invoice could look like this.</h2>
+    <p>It takes less time to fill in than it did to read this page.</p>
+    <a href="app.html" class="primary-btn">
+      <span>Create your invoice</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <a href="index.html" class="site-nav-brand">
+      <span class="site-nav-mark">§</span>
+      <span>Ledger Studio</span>
+    </a>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="app.html">Create invoice</a>
+    </div>
+    <p class="footer-credit">Built for people who'd rather be doing the work than formatting the invoice.</p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+  // count up the hero mock total once it scrolls into view
+  const mockTotalEl = document.getElementById('mockTotal');
+  const target = 335000;
+  const symbol = '₦';
+  let started = false;
+  const fmt = (n) => symbol + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const wrap = document.querySelector('.hero-mock-wrap');
+  if (wrap && 'IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !started) {
+          started = true;
+          const duration = 1100;
+          const start = performance.now();
+          function tick(now){
+            const p = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - p, 3);
+            mockTotalEl.textContent = fmt(target * eased);
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+    obs.observe(wrap);
+  } else if (mockTotalEl) {
+    mockTotalEl.textContent = fmt(target);
+  }
+</script>
+</body>
+</html>
