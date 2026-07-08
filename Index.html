@@ -3,210 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ledger Studio — Invoices your clients take seriously</title>
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<title>Ledger Studio — Beautiful invoices, generated in seconds</title>
+<meta name="description" content="Ledger Studio helps freelancers and businesses create polished, professional invoices in minutes — with your logo, your bank details, and your brand.">
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="page-marketing">
+<body>
 
-<!-- ============ SITE NAV ============ -->
-<nav class="site-nav">
-  <a href="index.html" class="site-nav-brand">
-    <span class="site-nav-mark">§</span>
-    <span>Ledger Studio</span>
-  </a>
-  <div class="site-nav-links">
-    <a href="index.html" class="site-nav-active">Home</a>
-    <a href="about.html">About</a>
-    <a href="app.html">Create invoice</a>
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="active">Home</a>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#how">How it works</a>
+      <a href="about.html">About Us</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode"><span class="knob"></span></button>
+      <a href="app.html" class="btn btn-primary btn-sm">Get Started</a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
   </div>
-  <button class="site-nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
 
-<!-- ============ HERO ============ -->
-<header class="hero">
-  <div class="hero-glow" aria-hidden="true"></div>
-  <div class="hero-inner">
-    <div class="hero-copy" data-reveal>
-      <p class="eyebrow">Invoicing, done properly</p>
-      <h1 class="hero-title">Send invoices your<br>clients take seriously.</h1>
-      <p class="hero-sub">
-        Ledger Studio turns a plain list of line items into a paper-crisp,
-        gold-foiled invoice in real time — fill in a field on the left,
-        watch it appear on the right. No account, no software to install,
-        no invoice that looks like everyone else's.
-      </p>
+<section class="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="hero-bg-grid"></div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Invoicing, refined</span>
+      <h1>Invoices worthy of the work you do.</h1>
+      <p class="lead">Ledger Studio turns client billing into a two-minute ritual — your logo, your bank details, your brand, remembered every time. No spreadsheets, no clutter, just clean paperwork that gets you paid.</p>
       <div class="hero-actions">
-        <a href="app.html" class="primary-btn hero-cta">
-          <span>Create your invoice</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a href="about.html" class="text-link">Why we built this →</a>
+        <a href="app.html" class="btn btn-primary">Create your first invoice →</a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
       </div>
-      <p class="hero-note">Free to use. Your data stays on your device.</p>
+      <div class="trust-row">
+        <div class="stat"><b>2 min</b><span>Avg. time to send</span></div>
+        <div class="stat"><b>100%</b><span>Free to use</span></div>
+        <div class="stat"><b>&#8734;</b><span>Invoices saved locally</span></div>
+      </div>
     </div>
 
-    <!-- signature element: live-feeling mini invoice mockup -->
-    <div class="hero-mock-wrap" data-reveal>
-      <div class="hero-mock">
-        <svg class="foil-frame" viewBox="0 0 800 1040" preserveAspectRatio="none">
-          <rect x="14" y="14" width="772" height="1012" rx="2" class="foil-rect"/>
-        </svg>
-        <div class="mock-head">
+    <div class="invoice-mock" aria-hidden="true">
+      <div class="invoice-mock-head">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="im-logo"></div>
           <div>
-            <span class="mock-mark">§</span>
-            <p class="mock-brand">Adire &amp; Co.</p>
-            <p class="mock-detail">studio@adireandco.com</p>
-          </div>
-          <div class="mock-meta">
-            <p class="mock-invoice-word">Invoice</p>
-            <p class="mock-row"><span>No.</span><b>INV-2026-0417</b></p>
-            <p class="mock-row"><span>Due</span><b>21 Jul 2026</b></p>
+            <h4>Bright & Co.</h4>
+            <small>invoice #LS-0148</small>
           </div>
         </div>
-        <div class="mock-divider"></div>
-        <div class="mock-line"><span>Brand identity &amp; logo suite</span><b>₦180,000.00</b></div>
-        <div class="mock-line"><span>Packaging design — 3 SKUs</span><b>₦95,000.00</b></div>
-        <div class="mock-line mock-line-in"><span>Launch social templates</span><b>₦60,000.00</b></div>
-        <div class="mock-divider thin"></div>
-        <div class="mock-total">
-          <span>Total due</span>
-          <b id="mockTotal">₦0.00</b>
-        </div>
-        <div class="mock-seal">
-          <svg width="72" height="72" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="56" class="seal-ring"/>
-            <circle cx="60" cy="60" r="46" class="seal-ring-inner"/>
-            <text x="60" y="55" text-anchor="middle" class="seal-text">PAID IN</text>
-            <text x="60" y="72" text-anchor="middle" class="seal-text">FULL TRUST</text>
-          </svg>
-        </div>
+        <span class="im-badge">DUE JUL 24</span>
       </div>
-      <div class="hero-mock-shadow" aria-hidden="true"></div>
+      <div class="im-row"><span>Brand identity design</span><span>$1,800.00</span></div>
+      <div class="im-row"><span>Website — 4 pages</span><span>$2,400.00</span></div>
+      <div class="im-row"><span>Monthly retainer</span><span>$650.00</span></div>
+      <div class="im-total">
+        <span style="font-size:13px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;">Total due</span>
+        <b class="im-total-num">$4,850.00</b>
+      </div>
+      <div class="im-stamp">Paid</div>
     </div>
   </div>
-</header>
+</section>
 
-<!-- ============ HOW IT WORKS ============ -->
-<section class="section" id="how">
-  <div class="section-inner">
-    <p class="eyebrow center" data-reveal>How it works</p>
-    <h2 class="section-title center" data-reveal>From blank form to sent invoice, in three steps.</h2>
-
-    <div class="steps">
-      <div class="step" data-reveal>
-        <span class="step-index">01</span>
-        <h3>Fill in your details</h3>
-        <p>Your business, your client, and what you did for them. Everything autosaves as you go.</p>
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Why Ledger Studio</span>
+      <h2>Everything an invoice needs. Nothing it doesn't.</h2>
+    </div>
+    <div class="feature-grid reveal-stagger">
+      <div class="feature-card">
+        <div class="feature-icon">🖋️</div>
+        <h3>Your brand, remembered</h3>
+        <p>Upload your logo and save your company details once. Every invoice after that is pre-filled and ready.</p>
       </div>
-      <div class="step" data-reveal>
-        <span class="step-index">02</span>
-        <h3>Watch it build itself</h3>
-        <p>A gold-foiled invoice assembles on the right in real time — totals, tax, and discount included.</p>
+      <div class="feature-card">
+        <div class="feature-icon">🏦</div>
+        <h3>Bank details built in</h3>
+        <p>Store your payment details securely and have them appear automatically on every invoice you send.</p>
       </div>
-      <div class="step" data-reveal>
-        <span class="step-index">03</span>
-        <h3>Download and send</h3>
-        <p>One click turns it into a clean PDF, ready to attach to an email or share with your client.</p>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>A dashboard that counts</h3>
+        <p>Track what you've earned, filter by week, month or year, and see paid vs. outstanding at a glance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✏️</div>
+        <h3>Edit anytime</h3>
+        <p>Revisit any invoice you've created, update line items or client details, and keep your records current.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌗</div>
+        <h3>Light or dark</h3>
+        <p>Switch between a bright studio look and a low-light ledger — whichever suits your desk.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>Works on any screen</h3>
+        <p>Create and check invoices from your phone, tablet or desktop, with a layout that adapts to all three.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ FEATURES ============ -->
-<section class="section section-alt" id="features">
-  <div class="section-inner">
-    <p class="eyebrow center" data-reveal>Built for the work, not the paperwork</p>
-    <h2 class="section-title center" data-reveal>Everything an invoice needs. Nothing it doesn't.</h2>
-
-    <div class="feature-grid">
-      <article class="feature-card" data-reveal>
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3" y="3" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.4"/><path d="M8 13h10M8 9h6M8 17h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        <h3>Live preview</h3>
-        <p>No "generate" button to guess at. The finished invoice updates as you type each field.</p>
-      </article>
-      <article class="feature-card" data-reveal>
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3v20M6 8c0-2.5 3-3 7-3s7 .8 7 3-3 2.7-7 3-7 .5-7 3 3 3 7 3 7-.5 7-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        <h3>Tax &amp; discount, built in</h3>
-        <p>Set a rate once and every total recalculates instantly — subtotal, discount, tax, and the number that matters.</p>
-      </article>
-      <article class="feature-card" data-reveal>
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M6 3h10l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M13 12v7m0 0l-3-3m3 3l3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <h3>One-click PDF</h3>
-        <p>Download a clean, print-ready PDF straight from the browser — no extra software, no watermark.</p>
-      </article>
-      <article class="feature-card" data-reveal>
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="7" y="2" width="12" height="22" rx="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M12 20h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        <h3>Made for any screen</h3>
-        <p>Draft an invoice on your laptop, tweak the total on your phone before a meeting. It keeps up.</p>
-      </article>
+<section class="section" id="how" style="background:var(--surface-2);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">The process</span>
+      <h2>From blank page to sent invoice, in four steps.</h2>
+    </div>
+    <div class="steps reveal-stagger">
+      <div class="step">
+        <span class="step-num">01</span>
+        <h3>Set up your studio</h3>
+        <p>Add your company name, logo and bank details once — Ledger Studio remembers them from here on.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <h3>Add your client</h3>
+        <p>Enter their name, email and address, or pick a client you've billed before.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <h3>List the work</h3>
+        <p>Add line items, quantities and rates. Totals, tax and discounts calculate themselves.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <h3>Send or print</h3>
+        <p>Preview your invoice exactly as your client will see it, then print or save it as a PDF.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ CTA BANNER ============ -->
-<section class="cta-banner">
-  <div class="cta-banner-inner" data-reveal>
-    <h2>Your next invoice could look like this.</h2>
-    <p>It takes less time to fill in than it did to read this page.</p>
-    <a href="app.html" class="primary-btn">
-      <span>Create your invoice</span>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
+<section class="section">
+  <div class="container">
+    <div class="quote-block reveal">
+      <p>"Ledger Studio is the closest thing to handing a client an invoice on letterhead — without owning a printer."</p>
+      <div class="quote-attr">— A freelance designer, three years into using it</div>
+    </div>
   </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
-<footer class="site-footer">
-  <div class="footer-inner">
-    <a href="index.html" class="site-nav-brand">
-      <span class="site-nav-mark">§</span>
-      <span>Ledger Studio</span>
-    </a>
-    <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="app.html">Create invoice</a>
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="cta-banner reveal">
+      <div class="cta-glow"></div>
+      <h2>Your next invoice is two minutes away.</h2>
+      <p>No sign-up walls, no trial countdown. Set up your studio and start billing clients properly today.</p>
+      <a href="app.html" class="btn btn-ghost">Get started — it's free →</a>
     </div>
-    <p class="footer-credit">Built for people who'd rather be doing the work than formatting the invoice.</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+        <p>A calmer way to invoice. Built for freelancers, studios and small businesses who want their paperwork to look as good as their work.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="index.html#features">Features</a>
+        <a href="index.html#how">How it works</a>
+        <a href="app.html">Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="about.html">About us</a>
+        <a href="app.html">Get started</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ledger Studio</h4>
+        <a href="app.html">Create invoice</a>
+        <a href="app.html">View invoices</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Ledger Studio. All rights reserved.</span>
+      <span>Designed for freelancers, worldwide.</span>
+    </div>
   </div>
 </footer>
 
-<script src="main.js"></script>
-<script>
-  // count up the hero mock total once it scrolls into view
-  const mockTotalEl = document.getElementById('mockTotal');
-  const target = 335000;
-  const symbol = '₦';
-  let started = false;
-  const fmt = (n) => symbol + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const wrap = document.querySelector('.hero-mock-wrap');
-  if (wrap && 'IntersectionObserver' in window) {
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && !started) {
-          started = true;
-          const duration = 1100;
-          const start = performance.now();
-          function tick(now){
-            const p = Math.min(1, (now - start) / duration);
-            const eased = 1 - Math.pow(1 - p, 3);
-            mockTotalEl.textContent = fmt(target * eased);
-            if (p < 1) requestAnimationFrame(tick);
-          }
-          requestAnimationFrame(tick);
-          obs.disconnect();
-        }
-      });
-    }, { threshold: 0.4 });
-    obs.observe(wrap);
-  } else if (mockTotalEl) {
-    mockTotalEl.textContent = fmt(target);
-  }
-</script>
+<script src="script.js"></script>
 </body>
 </html>

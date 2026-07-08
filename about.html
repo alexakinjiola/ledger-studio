@@ -3,135 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About — Ledger Studio</title>
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<title>About Us — Ledger Studio</title>
+<meta name="description" content="Why Ledger Studio exists, what we believe about invoicing, and the people building it.">
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="page-marketing">
+<body>
 
-<!-- ============ SITE NAV ============ -->
-<nav class="site-nav">
-  <a href="index.html" class="site-nav-brand">
-    <span class="site-nav-mark">§</span>
-    <span>Ledger Studio</span>
-  </a>
-  <div class="site-nav-links">
-    <a href="index.html">Home</a>
-    <a href="about.html" class="site-nav-active">About</a>
-    <a href="app.html">Create invoice</a>
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#how">How it works</a>
+      <a href="about.html" class="active">About Us</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode"><span class="knob"></span></button>
+      <a href="app.html" class="btn btn-primary btn-sm">Get Started</a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
   </div>
-  <button class="site-nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
 
-<!-- ============ ABOUT HERO ============ -->
-<header class="about-hero">
-  <div class="about-hero-inner" data-reveal>
-    <p class="eyebrow">About Ledger Studio</p>
-    <h1 class="about-title">A good invoice is the last impression, not an afterthought.</h1>
-    <p class="about-lede">
-      Most invoicing tools were built for accounting departments. Ledger Studio
-      was built for the freelancer, the small studio, and the independent
-      professional who does excellent work and then hands their client a
-      document that undersells it.
-    </p>
+<section class="about-hero">
+  <div class="container">
+    <span class="eyebrow">About Ledger Studio</span>
+    <h1 class="reveal">We think invoicing deserves better than a spreadsheet.</h1>
+    <p class="lead reveal" style="margin:24px auto 0;text-align:center;">Ledger Studio started as a simple question: why does the last step of getting paid — the invoice — so often look like an afterthought? We set out to make it the opposite.</p>
   </div>
-</header>
+</section>
 
-<!-- ============ STORY ============ -->
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+    <div class="stat-strip reveal-stagger">
+      <div class="stat"><b>2019</b><span>Idea sketched</span></div>
+      <div class="stat"><b>4</b><span>Guiding values</span></div>
+      <div class="stat"><b>0</b><span>Spreadsheets required</span></div>
+      <div class="stat"><b>100%</b><span>Built for freelancers</span></div>
+    </div>
+  </div>
+</section>
+
 <section class="section">
-  <div class="about-copy" data-reveal>
-    <p>
-      Ledger Studio started from a simple annoyance: the work was good, but
-      the invoice that followed it looked like a leftover spreadsheet. A
-      client who'd just paid for careful, considered design or code or
-      strategy would receive a document with none of that care in it. The
-      gap was jarring, and it was entirely avoidable.
-    </p>
-    <p>
-      So the brief was narrow on purpose. No dashboards to configure, no
-      account to create, no monthly fee for a feature you'll use four times
-      a year. Just a form on one side and a finished, gold-foiled invoice on
-      the other, updating as you type, ready to become a PDF the moment
-      you're done.
-    </p>
-    <p>
-      Everything about the design — the deep green, the foil border, the
-      wax seal that stamps down when an invoice is generated — is there to
-      make the document feel considered, because it's standing in for you
-      in a moment you're not in the room for.
-    </p>
-  </div>
-</section>
-
-<!-- ============ VALUES ============ -->
-<section class="section section-alt">
-  <div class="section-inner">
-    <p class="eyebrow center" data-reveal>What guides it</p>
-    <h2 class="section-title center" data-reveal>Three things we didn't compromise on.</h2>
-
-    <div class="values-grid">
-      <article class="value-card" data-reveal>
-        <span class="value-mark">01</span>
-        <h3>Clarity</h3>
-        <p>
-          Every field on the form has one job. Every number on the invoice
-          is labeled plainly. A client should never have to guess what
-          they're being asked to pay for.
-        </p>
-      </article>
-      <article class="value-card" data-reveal>
-        <span class="value-mark">02</span>
-        <h3>Craft</h3>
-        <p>
-          Type, spacing, and color were chosen the way you'd choose them
-          for a client project — because to the person receiving the
-          invoice, that's exactly what it is.
-        </p>
-      </article>
-      <article class="value-card" data-reveal>
-        <span class="value-mark">03</span>
-        <h3>Trust</h3>
-        <p>
-          Your business details, your client's information, your line
-          items — they stay in your browser. Nothing is uploaded to a
-          server you don't control.
-        </p>
-      </article>
+  <div class="container">
+    <div class="split reveal">
+      <div>
+        <span class="eyebrow">Our belief</span>
+        <h2>Paperwork is part of the craft, not separate from it.</h2>
+        <p style="margin-top:20px;">The invoice is often the last thing a client sees from you before they pay. We believe it should look as considered as the work it's billing for — clear, calm, and unmistakably yours.</p>
+        <p style="margin-top:16px;">So we built Ledger Studio around three ideas: your brand should carry through automatically, your numbers should be trustworthy at a glance, and the whole process should take minutes, not an afternoon.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <span>STEP ONE</span>
+          <h3 style="margin:8px 0 6px;">Set up once</h3>
+          <p>Your logo, company details and bank information, saved for every invoice that follows.</p>
+        </div>
+        <div class="timeline-item">
+          <span>STEP TWO</span>
+          <h3 style="margin:8px 0 6px;">Bill with confidence</h3>
+          <p>Clean line items, automatic totals, and a preview that matches exactly what your client receives.</p>
+        </div>
+        <div class="timeline-item">
+          <span>STEP THREE</span>
+          <h3 style="margin:8px 0 6px;">Track what's coming in</h3>
+          <p>A dashboard that shows what you've earned and what's still outstanding, filtered your way.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ CTA BANNER ============ -->
-<section class="cta-banner">
-  <div class="cta-banner-inner" data-reveal>
-    <h2>Ready to see it for yourself?</h2>
-    <p>Start filling in a form. Watch an invoice build itself.</p>
-    <a href="app.html" class="primary-btn">
-      <span>Create your invoice</span>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
+<section class="section" style="background:var(--surface-2);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">What we stand for</span>
+      <h2>The values behind every screen.</h2>
+    </div>
+    <div class="values-grid reveal-stagger">
+      <div class="value-card">
+        <span class="n">01</span>
+        <h3 style="margin:14px 0 8px;">Clarity over clutter</h3>
+        <p>Every field earns its place. If it doesn't help you get paid faster, it's not on the page.</p>
+      </div>
+      <div class="value-card">
+        <span class="n">02</span>
+        <h3 style="margin:14px 0 8px;">Your data stays yours</h3>
+        <p>Your company details, bank information and invoices are stored on your own device, not on a server you don't control.</p>
+      </div>
+      <div class="value-card">
+        <span class="n">03</span>
+        <h3 style="margin:14px 0 8px;">Built for real work</h3>
+        <p>Designed around how freelancers and small studios actually bill clients — not how a big accounting suite thinks you should.</p>
+      </div>
+      <div class="value-card">
+        <span class="n">04</span>
+        <h3 style="margin:14px 0 8px;">Quietly beautiful</h3>
+        <p>A tool you open every week should be pleasant to look at. We spent as much time on the motion and detail as the math.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
-<footer class="site-footer">
-  <div class="footer-inner">
-    <a href="index.html" class="site-nav-brand">
-      <span class="site-nav-mark">§</span>
-      <span>Ledger Studio</span>
-    </a>
-    <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="app.html">Create invoice</a>
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">The studio</span>
+      <h2>A small team, obsessed with the details.</h2>
     </div>
-    <p class="footer-credit">Built for people who'd rather be doing the work than formatting the invoice.</p>
+    <div class="team-grid reveal-stagger">
+      <div class="team-card">
+        <div class="team-avatar">A</div>
+        <h4>Amara Chen</h4>
+        <span>Product & Design</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">D</div>
+        <h4>David Okafor</h4>
+        <span>Engineering</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">R</div>
+        <h4>Rhea Kapoor</h4>
+        <span>Customer Experience</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">M</div>
+        <h4>Marco Silva</h4>
+        <span>Brand & Content</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="cta-banner reveal">
+      <div class="cta-glow"></div>
+      <h2>Ready to see it for yourself?</h2>
+      <p>Set up your studio in minutes and send an invoice that actually looks like you.</p>
+      <a href="app.html" class="btn btn-ghost">Get started — it's free →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+        <p>A calmer way to invoice. Built for freelancers, studios and small businesses who want their paperwork to look as good as their work.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="index.html#features">Features</a>
+        <a href="index.html#how">How it works</a>
+        <a href="app.html">Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="about.html">About us</a>
+        <a href="app.html">Get started</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ledger Studio</h4>
+        <a href="app.html">Create invoice</a>
+        <a href="app.html">View invoices</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Ledger Studio. All rights reserved.</span>
+      <span>Designed for freelancers, worldwide.</span>
+    </div>
   </div>
 </footer>
 
-<script src="main.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
