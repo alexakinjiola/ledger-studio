@@ -37,7 +37,7 @@
   let pendingDeleteId      = null;
 
   const uid = ()=> "inv_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-  const fmtMoney = (num, symbol)=> (symbol||"$") + Number(num||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtMoney = (num, symbol)=> (symbol||"₦") + Number(num||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtDate = (d)=>{
     if(!d) return "—";
     const dt = new Date(d + "T00:00:00");
@@ -386,7 +386,7 @@
     document.getElementById("issueDate").value = today;
     const due = new Date(); due.setDate(due.getDate()+14);
     document.getElementById("dueDate").value = due.toISOString().slice(0,10);
-    document.getElementById("currency").value = "$";
+    document.getElementById("currency").value = "₦";
     document.getElementById("taxPercent").value = 0;
     document.getElementById("discountPercent").value = 0;
     document.getElementById("invoiceNotes").value = "Thank you for your business! Payment is due within 14 days.";
@@ -413,7 +413,7 @@
     document.getElementById("invoiceStatus").value = inv.status || "unpaid";
     document.getElementById("issueDate").value = inv.issueDate || "";
     document.getElementById("dueDate").value = inv.dueDate || "";
-    document.getElementById("currency").value = inv.currency || "$";
+    document.getElementById("currency").value = inv.currency || "₦";
     document.getElementById("taxPercent").value = inv.taxPercent || 0;
     document.getElementById("discountPercent").value = inv.discountPercent || 0;
     document.getElementById("invoiceNotes").value = inv.notes || "";
@@ -567,4 +567,4 @@
   /* ---------------- init ---------------- */
   resetEditor();
   renderDashboard();
-})();a
+})();
