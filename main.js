@@ -11,6 +11,19 @@
 
   const supa = window.supabaseClient;
 
+  if(!supa){
+    // The Supabase SDK or supabase-config.js failed to load — every request would
+    // hang silently without this check. Tell the person plainly instead.
+    const err = document.getElementById("authError");
+    if(err){
+      err.textContent = "Ledger Studio couldn't connect to Supabase. Check that supabase-config.js has your real Project URL and anon key, and that script tags in app.html are loading (open the browser console for details).";
+      err.classList.add("show");
+    }
+    document.querySelectorAll("#signinSubmitBtn, #signupSubmitBtn").forEach(b=>{ b.disabled = true; });
+    console.error("Ledger Studio: window.supabaseClient is undefined. Check supabase-config.js and that the Supabase CDN script loaded (view Network tab for a failed request).");
+    return;
+  }
+
   const uid = (p)=> (p||"id_") + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   const fmtMoney = (num, symbol)=> (symbol||"₦") + Number(num||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtDate = (d)=>{
@@ -34,10 +47,15 @@
   }
   function friendlyError(error){
     if(!error) return "Something went wrong. Please try again.";
-    if(/already registered/i.test(error.message)) return "An account with that email already exists — try signing in.";
-    if(/invalid login credentials/i.test(error.message)) return "That email and password don't match our records.";
-    if(/email not confirmed/i.test(error.message)) return "Please confirm your email before signing in — check your inbox.";
-    return error.message || "Something went wrong. Please try again.";
+    const msg = error.message || String(error);
+    if(/failed to fetch|networkerror|load failed/i.test(msg)){
+      return "Couldn't reach Supabase. Check your internet connection, and that SUPABASE_URL in supabase-config.js is correct.";
+    }
+    if(/already registered/i.test(msg)) return "An account with that email already exists — try signing in.";
+    if(/invalid login credentials/i.test(msg)) return "That email and password don't match our records.";
+    if(/email not confirmed/i.test(msg)) return "Please confirm your email before signing in — check your inbox.";
+    if(/invalid api key/i.test(msg)) return "Supabase rejected the API key. Double-check SUPABASE_ANON_KEY in supabase-config.js.";
+    return msg || "Something went wrong. Please try again.";
   }
 
   /* ---------------- Field mapping: DB (snake_case) <-> App (camelCase) ---------------- */
@@ -136,10 +154,16 @@
     const email = document.getElementById("signinEmail").value.trim();
     const password = document.getElementById("signinPassword").value;
     const done = setBusy(document.getElementById("signinSubmitBtn"), "Signing in…");
-    const { data, error } = await supa.auth.signInWithPassword({ email, password });
-    done();
-    if(error){ showAuthError(friendlyError(error)); return; }
-    await handleSignedIn(data.user);
+    try{
+      const { data, error } = await supa.auth.signInWithPassword({ email, password });
+      if(error){ showAuthError(friendlyError(error)); return; }
+      await handleSignedIn(data.user);
+    }catch(err){
+      console.error(err);
+      showAuthError(friendlyError(err));
+    }finally{
+      done();
+    }
   });
 
   document.getElementById("signupForm").addEventListener("submit", async (e)=>{
@@ -151,17 +175,23 @@
     if(password.length < 6){ showAuthError("Password should be at least 6 characters."); return; }
 
     const done = setBusy(document.getElementById("signupSubmitBtn"), "Creating account…");
-    const { data, error } = await supa.auth.signUp({ email, password, options:{ data:{ name } } });
-    done();
-    if(error){ showAuthError(friendlyError(error)); return; }
+    try{
+      const { data, error } = await supa.auth.signUp({ email, password, options:{ data:{ name } } });
+      if(error){ showAuthError(friendlyError(error)); return; }
 
-    if(!data.session){
-      toast("Account created — check your email to confirm, then sign in.");
-      document.querySelector('.auth-tab[data-tab="signin"]').click();
-      return;
+      if(!data.session){
+        toast("Account created — check your email to confirm, then sign in.");
+        document.querySelector('.auth-tab[data-tab="signin"]').click();
+        return;
+      }
+      toast("Account created — welcome!");
+      await handleSignedIn(data.user);
+    }catch(err){
+      console.error(err);
+      showAuthError(friendlyError(err));
+    }finally{
+      done();
     }
-    toast("Account created — welcome!");
-    await handleSignedIn(data.user);
   });
 
   async function handleSignedIn(user){
@@ -180,7 +210,7 @@
   }
 
   async function logOut(){
-    await supa.auth.signOut();
+    try{ await supa.auth.signOut(); }catch(err){ console.error(err); }
     currentUser = null;
     company = {name:"", email:"", phone:"", address:"", logo:""};
     bank = {bankName:"", accountName:"", accountNumber:"", iban:"", swift:""};
@@ -198,10 +228,15 @@
   });
 
   async function tryResumeSession(){
-    const { data:{ session } } = await supa.auth.getSession();
-    if(!session) return false;
-    await handleSignedIn(session.user);
-    return true;
+    try{
+      const { data:{ session } } = await supa.auth.getSession();
+      if(!session) return false;
+      await handleSignedIn(session.user);
+      return true;
+    }catch(err){
+      console.error(err);
+      return false;
+    }
   }
 
   /* =========================================================
@@ -426,11 +461,16 @@
   document.getElementById("confirmDeleteBtn").addEventListener("click", async ()=>{
     if(pendingDeleteId){
       const id = pendingDeleteId;
-      const { error } = await supa.from("invoices").delete().eq("id", id).eq("user_id", currentUser.id);
-      if(error){ toast(friendlyError(error), "error"); }
-      else{
-        invoices = invoices.filter(i=>i.id !== id);
-        toast("Invoice deleted");
+      try{
+        const { error } = await supa.from("invoices").delete().eq("id", id).eq("user_id", currentUser.id);
+        if(error){ toast(friendlyError(error), "error"); }
+        else{
+          invoices = invoices.filter(i=>i.id !== id);
+          toast("Invoice deleted");
+        }
+      }catch(err){
+        console.error(err);
+        toast(friendlyError(err), "error");
       }
     }
     pendingDeleteId = null;
@@ -643,29 +683,34 @@
     };
 
     const done = setBusy(document.getElementById("saveInvoiceBtn"), "Saving…");
-    if(editingInvoiceId){
-      const { data, error } = await supa.from("invoices")
-        .update(toDbInvoice(payload, currentUser.id))
-        .eq("id", editingInvoiceId).eq("user_id", currentUser.id)
-        .select().single();
+    try{
+      if(editingInvoiceId){
+        const { data, error } = await supa.from("invoices")
+          .update(toDbInvoice(payload, currentUser.id))
+          .eq("id", editingInvoiceId).eq("user_id", currentUser.id)
+          .select().single();
+        if(error){ toast(friendlyError(error), "error"); return; }
+        invoices = invoices.map(i => i.id === editingInvoiceId ? fromDbInvoice(data) : i);
+        toast("Invoice updated");
+      } else {
+        const { data, error } = await supa.from("invoices")
+          .insert(toDbInvoice(payload, currentUser.id))
+          .select().single();
+        if(error){ toast(friendlyError(error), "error"); return; }
+        const saved = fromDbInvoice(data);
+        invoices.push(saved);
+        editingInvoiceId = saved.id;
+        document.getElementById("invoiceId").value = saved.id;
+        document.getElementById("editorTitle").textContent = "Edit Invoice";
+        toast("Invoice saved");
+      }
+      renderInvoiceTable();
+    }catch(err){
+      console.error(err);
+      toast(friendlyError(err), "error");
+    }finally{
       done();
-      if(error){ toast(friendlyError(error), "error"); return; }
-      invoices = invoices.map(i => i.id === editingInvoiceId ? fromDbInvoice(data) : i);
-      toast("Invoice updated");
-    } else {
-      const { data, error } = await supa.from("invoices")
-        .insert(toDbInvoice(payload, currentUser.id))
-        .select().single();
-      done();
-      if(error){ toast(friendlyError(error), "error"); return; }
-      const saved = fromDbInvoice(data);
-      invoices.push(saved);
-      editingInvoiceId = saved.id;
-      document.getElementById("invoiceId").value = saved.id;
-      document.getElementById("editorTitle").textContent = "Edit Invoice";
-      toast("Invoice saved");
     }
-    renderInvoiceTable();
   });
 
   document.getElementById("printBtn").addEventListener("click", ()=> window.print());
@@ -809,11 +854,17 @@
       logo: company.logo || "",
       updated_at: new Date().toISOString()
     };
-    const { error } = await supa.from("companies").upsert(next, { onConflict: "user_id" });
-    done();
-    if(error){ toast(friendlyError(error), "error"); return; }
-    company = fromDbCompany(next);
-    toast("Company details saved");
+    try{
+      const { error } = await supa.from("companies").upsert(next, { onConflict: "user_id" });
+      if(error){ toast(friendlyError(error), "error"); return; }
+      company = fromDbCompany(next);
+      toast("Company details saved");
+    }catch(err){
+      console.error(err);
+      toast(friendlyError(err), "error");
+    }finally{
+      done();
+    }
   });
 
   /* =========================================================
@@ -838,11 +889,17 @@
       swift: document.getElementById("swift").value.trim(),
       updated_at: new Date().toISOString()
     };
-    const { error } = await supa.from("bank_details").upsert(next, { onConflict: "user_id" });
-    done();
-    if(error){ toast(friendlyError(error), "error"); return; }
-    bank = fromDbBank(next);
-    toast("Bank details saved");
+    try{
+      const { error } = await supa.from("bank_details").upsert(next, { onConflict: "user_id" });
+      if(error){ toast(friendlyError(error), "error"); return; }
+      bank = fromDbBank(next);
+      toast("Bank details saved");
+    }catch(err){
+      console.error(err);
+      toast(friendlyError(err), "error");
+    }finally{
+      done();
+    }
   });
 
   /* =========================================================
@@ -877,13 +934,18 @@
     const reader = new FileReader();
     reader.onload = async (ev)=>{
       currentUser.avatar = ev.target.result;
-      const { error } = await supa.from("profiles").upsert(
-        { id: currentUser.id, name: currentUser.name, avatar_url: currentUser.avatar }, { onConflict:"id" }
-      );
-      if(error){ toast(friendlyError(error), "error"); return; }
-      loadProfileForm();
-      updateSidebarUser();
-      toast("Profile photo updated");
+      try{
+        const { error } = await supa.from("profiles").upsert(
+          { id: currentUser.id, name: currentUser.name, avatar_url: currentUser.avatar }, { onConflict:"id" }
+        );
+        if(error){ toast(friendlyError(error), "error"); return; }
+        loadProfileForm();
+        updateSidebarUser();
+        toast("Profile photo updated");
+      }catch(err){
+        console.error(err);
+        toast(friendlyError(err), "error");
+      }
     };
     reader.readAsDataURL(file);
   });
@@ -894,24 +956,28 @@
     if(!name || !email){ toast("Name and email can't be empty", "error"); return; }
 
     const done = setBusy(document.getElementById("saveProfileBtn"), "Saving…");
+    try{
+      const { error: profileError } = await supa.from("profiles").upsert(
+        { id: currentUser.id, name, avatar_url: currentUser.avatar || "" }, { onConflict:"id" }
+      );
+      if(profileError){ toast(friendlyError(profileError), "error"); return; }
+      currentUser.name = name;
 
-    const { error: profileError } = await supa.from("profiles").upsert(
-      { id: currentUser.id, name, avatar_url: currentUser.avatar || "" }, { onConflict:"id" }
-    );
-    if(profileError){ done(); toast(friendlyError(profileError), "error"); return; }
-    currentUser.name = name;
-
-    if(email !== currentUser.email){
-      const { error: emailError } = await supa.auth.updateUser({ email });
+      if(email !== currentUser.email){
+        const { error: emailError } = await supa.auth.updateUser({ email });
+        if(emailError){ toast(friendlyError(emailError), "error"); return; }
+        toast("Profile saved — check your new email to confirm the change");
+      } else {
+        toast("Profile saved");
+      }
+      loadProfileForm();
+      updateSidebarUser();
+    }catch(err){
+      console.error(err);
+      toast(friendlyError(err), "error");
+    }finally{
       done();
-      if(emailError){ toast(friendlyError(emailError), "error"); return; }
-      toast("Profile saved — check your new email to confirm the change");
-    } else {
-      done();
-      toast("Profile saved");
     }
-    loadProfileForm();
-    updateSidebarUser();
   });
 
   document.getElementById("changePasswordBtn").addEventListener("click", async ()=>{
@@ -920,15 +986,21 @@
     if(next.length < 6){ toast("New password should be at least 6 characters", "error"); return; }
 
     const done = setBusy(document.getElementById("changePasswordBtn"), "Updating…");
-    const { error: verifyError } = await supa.auth.signInWithPassword({ email: currentUser.email, password: current });
-    if(verifyError){ done(); toast("Current password is incorrect", "error"); return; }
+    try{
+      const { error: verifyError } = await supa.auth.signInWithPassword({ email: currentUser.email, password: current });
+      if(verifyError){ toast("Current password is incorrect", "error"); return; }
 
-    const { error } = await supa.auth.updateUser({ password: next });
-    done();
-    if(error){ toast(friendlyError(error), "error"); return; }
-    document.getElementById("currentPassword").value = "";
-    document.getElementById("newPassword").value = "";
-    toast("Password updated");
+      const { error } = await supa.auth.updateUser({ password: next });
+      if(error){ toast(friendlyError(error), "error"); return; }
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      toast("Password updated");
+    }catch(err){
+      console.error(err);
+      toast(friendlyError(err), "error");
+    }finally{
+      done();
+    }
   });
 
   const deleteAccountModal = document.getElementById("deleteAccountModal");
@@ -936,18 +1008,24 @@
   document.getElementById("cancelDeleteAccountBtn").addEventListener("click", ()=> deleteAccountModal.classList.remove("open"));
   document.getElementById("confirmDeleteAccountBtn").addEventListener("click", async ()=>{
     const done = setBusy(document.getElementById("confirmDeleteAccountBtn"), "Deleting…");
-    const uidVal = currentUser.id;
-    const results = await Promise.all([
-      supa.from("invoices").delete().eq("user_id", uidVal),
-      supa.from("companies").delete().eq("user_id", uidVal),
-      supa.from("bank_details").delete().eq("user_id", uidVal)
-    ]);
-    done();
-    const failed = results.find(r=>r.error);
-    if(failed){ toast(friendlyError(failed.error), "error"); return; }
-    deleteAccountModal.classList.remove("open");
-    toast("Your data has been deleted");
-    await logOut();
+    try{
+      const uidVal = currentUser.id;
+      const results = await Promise.all([
+        supa.from("invoices").delete().eq("user_id", uidVal),
+        supa.from("companies").delete().eq("user_id", uidVal),
+        supa.from("bank_details").delete().eq("user_id", uidVal)
+      ]);
+      const failed = results.find(r=>r.error);
+      if(failed){ toast(friendlyError(failed.error), "error"); return; }
+      deleteAccountModal.classList.remove("open");
+      toast("Your data has been deleted");
+      await logOut();
+    }catch(err){
+      console.error(err);
+      toast(friendlyError(err), "error");
+    }finally{
+      done();
+    }
   });
 
   /* =========================================================
