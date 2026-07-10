@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ledger Studio — Beautiful invoices, generated in seconds</title>
-<meta name="description" content="Ledger Studio helps freelancers and businesses create polished, professional invoices in minutes — with your logo, your bank details, and your brand.">
+<title>About Us — Ledger Studio</title>
+<meta name="description" content="Why Ledger Studio exists, what we believe about invoicing, and the people building it.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,10 +13,10 @@
   <div class="container nav-inner">
     <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
     <div class="nav-links" id="navLinks">
-      <a href="index.html" class="active">Home</a>
+      <a href="index.html">Home</a>
       <a href="index.html#features">Features</a>
       <a href="index.html#how">How it works</a>
-      <a href="about.html">About Us</a>
+      <a href="about.html" class="active">About Us</a>
     </div>
     <div class="nav-actions">
       <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode"><span class="knob"></span></button>
@@ -26,115 +26,81 @@
   </div>
 </nav>
 
-<section class="hero">
-  <div class="hero-bg-glow"></div>
-  <div class="hero-bg-grid"></div>
-  <div class="container hero-grid">
-    <div class="hero-copy">
-      <span class="eyebrow">Invoicing, refined</span>
-      <h1>Invoices worthy of the work you do.</h1>
-      <p class="lead">Ledger Studio turns client billing into a two-minute ritual — your logo, your bank details, your brand, remembered every time. No spreadsheets, no clutter, just clean paperwork that gets you paid.</p>
-      <div class="hero-actions">
-        <a href="app.html" class="btn btn-primary">Create your first invoice →</a>
-        <a href="#how" class="btn btn-ghost">See how it works</a>
-      </div>
-      <div class="trust-row">
-        <div class="stat"><b>2 min</b><span>Avg. time to send</span></div>
-        <div class="stat"><b>100%</b><span>Free to use</span></div>
-        <div class="stat"><b>&#8734;</b><span>Invoices saved locally</span></div>
-      </div>
-    </div>
+<section class="about-hero">
+  <div class="container">
+    <span class="eyebrow">About Ledger Studio</span>
+    <h1 class="reveal">We think invoicing deserves better than a spreadsheet.</h1>
+    <p class="lead reveal" style="margin:24px auto 0;text-align:center;">Ledger Studio started as a simple question: why does the last step of getting paid — the invoice — so often look like an afterthought? We set out to make it the opposite.</p>
+  </div>
+</section>
 
-    <div class="invoice-mock" aria-hidden="true">
-      <div class="invoice-mock-head">
-        <div style="display:flex;gap:12px;align-items:center;">
-          <div class="im-logo"></div>
-          <div>
-            <h4>Bright & Co.</h4>
-            <small>invoice #LS-0148</small>
-          </div>
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+    <div class="stat-strip reveal-stagger">
+      <div class="stat"><b>2019</b><span>Idea sketched</span></div>
+      <div class="stat"><b>4</b><span>Guiding values</span></div>
+      <div class="stat"><b>0</b><span>Spreadsheets required</span></div>
+      <div class="stat"><b>100%</b><span>Built for freelancers</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="split reveal">
+      <div>
+        <span class="eyebrow">Our belief</span>
+        <h2>Paperwork is part of the craft, not separate from it.</h2>
+        <p style="margin-top:20px;">The invoice is often the last thing a client sees from you before they pay. We believe it should look as considered as the work it's billing for — clear, calm, and unmistakably yours.</p>
+        <p style="margin-top:16px;">So we built Ledger Studio around three ideas: your brand should carry through automatically, your numbers should be trustworthy at a glance, and the whole process should take minutes, not an afternoon.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <span>STEP ONE</span>
+          <h3 style="margin:8px 0 6px;">Set up once</h3>
+          <p>Your logo, company details and bank information, saved for every invoice that follows.</p>
         </div>
-        <span class="im-badge">DUE JUL 24</span>
-      </div>
-      <div class="im-row"><span>Brand identity design</span><span>₦1,800,000.00</span></div>
-      <div class="im-row"><span>Website — 4 pages</span><span>₦2,400,000.00</span></div>
-      <div class="im-row"><span>Monthly retainer</span><span>₦650,000.00</span></div>
-      <div class="im-total">
-        <span style="font-size:13px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;">Total due</span>
-        <b class="im-total-num">₦4,850,000.00</b>
-      </div>
-      <div class="im-stamp">Paid</div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="features">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Why Ledger Studio</span>
-      <h2>Everything an invoice needs. Nothing it doesn't.</h2>
-    </div>
-    <div class="feature-grid reveal-stagger">
-      <div class="feature-card">
-        <div class="feature-icon">🖋️</div>
-        <h3>Your brand, remembered</h3>
-        <p>Upload your logo and save your company details once. Every invoice after that is pre-filled and ready.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏦</div>
-        <h3>Bank details built in</h3>
-        <p>Store your payment details securely and have them appear automatically on every invoice you send.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>A dashboard that counts</h3>
-        <p>Track what you've earned, filter by week, month or year, and see paid vs. outstanding at a glance.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">✏️</div>
-        <h3>Edit anytime</h3>
-        <p>Revisit any invoice you've created, update line items or client details, and keep your records current.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🌗</div>
-        <h3>Light or dark</h3>
-        <p>Switch between a bright studio look and a low-light ledger — whichever suits your desk.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📱</div>
-        <h3>Works on any screen</h3>
-        <p>Create and check invoices from your phone, tablet or desktop, with a layout that adapts to all three.</p>
+        <div class="timeline-item">
+          <span>STEP TWO</span>
+          <h3 style="margin:8px 0 6px;">Bill with confidence</h3>
+          <p>Clean line items, automatic totals, and a preview that matches exactly what your client receives.</p>
+        </div>
+        <div class="timeline-item">
+          <span>STEP THREE</span>
+          <h3 style="margin:8px 0 6px;">Track what's coming in</h3>
+          <p>A dashboard that shows what you've earned and what's still outstanding, filtered your way.</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section" id="how" style="background:var(--surface-2);">
+<section class="section" style="background:var(--surface-2);">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">The process</span>
-      <h2>From blank page to sent invoice, in four steps.</h2>
+      <span class="eyebrow">What we stand for</span>
+      <h2>The values behind every screen.</h2>
     </div>
-    <div class="steps reveal-stagger">
-      <div class="step">
-        <span class="step-num">01</span>
-        <h3>Set up your studio</h3>
-        <p>Add your company name, logo and bank details once — Ledger Studio remembers them from here on.</p>
+    <div class="values-grid reveal-stagger">
+      <div class="value-card">
+        <span class="n">01</span>
+        <h3 style="margin:14px 0 8px;">Clarity over clutter</h3>
+        <p>Every field earns its place. If it doesn't help you get paid faster, it's not on the page.</p>
       </div>
-      <div class="step">
-        <span class="step-num">02</span>
-        <h3>Add your client</h3>
-        <p>Enter their name, email and address, or pick a client you've billed before.</p>
+      <div class="value-card">
+        <span class="n">02</span>
+        <h3 style="margin:14px 0 8px;">Your data stays yours</h3>
+        <p>Your company details, bank information and invoices are stored on your own device, not on a server you don't control.</p>
       </div>
-      <div class="step">
-        <span class="step-num">03</span>
-        <h3>List the work</h3>
-        <p>Add line items, quantities and rates. Totals, tax and discounts calculate themselves.</p>
+      <div class="value-card">
+        <span class="n">03</span>
+        <h3 style="margin:14px 0 8px;">Built for real work</h3>
+        <p>Designed around how freelancers and small studios actually bill clients — not how a big accounting suite thinks you should.</p>
       </div>
-      <div class="step">
-        <span class="step-num">04</span>
-        <h3>Send or print</h3>
-        <p>Preview your invoice exactly as your client will see it, then print or save it as a PDF.</p>
+      <div class="value-card">
+        <span class="n">04</span>
+        <h3 style="margin:14px 0 8px;">Quietly beautiful</h3>
+        <p>A tool you open every week should be pleasant to look at. We spent as much time on the motion and detail as the math.</p>
       </div>
     </div>
   </div>
@@ -142,9 +108,31 @@
 
 <section class="section">
   <div class="container">
-    <div class="quote-block reveal">
-      <p>"Ledger Studio is the closest thing to handing a client an invoice on letterhead — without owning a printer."</p>
-      <div class="quote-attr">— A freelance designer, three years into using it</div>
+    <div class="section-head reveal">
+      <span class="eyebrow">The studio</span>
+      <h2>A small team, obsessed with the details.</h2>
+    </div>
+    <div class="team-grid reveal-stagger">
+      <div class="team-card">
+        <div class="team-avatar">A</div>
+        <h4>Amara Chen</h4>
+        <span>Product & Design</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">D</div>
+        <h4>David Okafor</h4>
+        <span>Engineering</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">R</div>
+        <h4>Rhea Kapoor</h4>
+        <span>Customer Experience</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">M</div>
+        <h4>Marco Silva</h4>
+        <span>Brand & Content</span>
+      </div>
     </div>
   </div>
 </section>
@@ -153,8 +141,8 @@
   <div class="container">
     <div class="cta-banner reveal">
       <div class="cta-glow"></div>
-      <h2>Your next invoice is two minutes away.</h2>
-      <p>No sign-up walls, no trial countdown. Set up your studio and start billing clients properly today.</p>
+      <h2>Ready to see it for yourself?</h2>
+      <p>Set up your studio in minutes and send an invoice that actually looks like you.</p>
       <a href="app.html" class="btn btn-ghost">Get started — it's free →</a>
     </div>
   </div>

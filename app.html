@@ -24,18 +24,26 @@
     <form class="auth-form active" id="signinForm">
       <div class="field"><label>Email</label><input type="email" id="signinEmail" required placeholder="you@studio.com"></div>
       <div class="field"><label>Password</label><input type="password" id="signinPassword" required placeholder="••••••••"></div>
-      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      <button type="submit" class="btn btn-primary btn-block" id="signinSubmitBtn">Sign in</button>
     </form>
 
     <form class="auth-form" id="signupForm">
       <div class="field"><label>Full name</label><input type="text" id="signupName" required placeholder="Amara Chen"></div>
       <div class="field"><label>Email</label><input type="email" id="signupEmail" required placeholder="you@studio.com"></div>
       <div class="field"><label>Password</label><input type="password" id="signupPassword" required placeholder="At least 6 characters"></div>
-      <button type="submit" class="btn btn-primary btn-block">Create account</button>
+      <button type="submit" class="btn btn-primary btn-block" id="signupSubmitBtn">Create account</button>
     </form>
 
     <div class="auth-foot" id="authFootText">New here? <button id="authFootBtn">Create an account</button></div>
-    <p class="demo-note">Accounts are stored securely on this device only — this is a self-contained demo login, not a synced cloud account.</p>
+    <p class="demo-note">Your account and data are stored securely in your own Supabase database — accessible from any device you sign in on.</p>
+  </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div class="auth-screen" id="appLoader" style="display:none;">
+  <div class="auth-card" style="text-align:center;">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="auth-sub" style="margin-top:18px;">Loading your studio…</p>
   </div>
 </div>
 
@@ -443,11 +451,11 @@
 <!-- Delete account confirmation -->
 <div class="modal-overlay" id="deleteAccountModal">
   <div class="modal">
-    <h3>Delete your account?</h3>
-    <p>This removes your profile, saved company & bank details, and every invoice on this device. This can't be undone.</p>
+    <h3>Clear your data?</h3>
+    <p>This permanently deletes your saved company details, bank details, and every invoice from your account, then signs you out. Your login itself stays active — contact support if you also want the login removed.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="cancelDeleteAccountBtn">Cancel</button>
-      <button class="btn btn-danger btn-sm" id="confirmDeleteAccountBtn">Delete everything</button>
+      <button class="btn btn-danger btn-sm" id="confirmDeleteAccountBtn">Delete my data</button>
     </div>
   </div>
 </div>
@@ -456,6 +464,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 <script src="main.js"></script>
 </body>
