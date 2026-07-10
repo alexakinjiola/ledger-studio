@@ -573,9 +573,119 @@ tbody tr:hover{background:var(--surface-2);}
   .invoice-preview{padding:26px;}
 }
 
+/* =========================================================
+   POLISH PASS — richer depth, texture and premium detailing
+========================================================= */
+.hero-bg-glow{filter:blur(2px);}
+.hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%),
+    radial-gradient(ellipse 50% 50% at 90% 10%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 60%);
+}
+.nav.scrolled{box-shadow:var(--shadow-sm);}
+.btn-primary{background:linear-gradient(135deg,var(--brand-light) 0%,var(--brand) 45%,var(--brand-dark) 100%);}
+.feature-card, .stat-card, .panel, .value-card, .step{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--surface) 100%, transparent) 0%, var(--surface) 100%);
+}
+.invoice-mock{backdrop-filter:blur(2px);}
+.im-logo, .logo-mark{position:relative;overflow:hidden;}
+.im-logo::after, .logo-mark::after{
+  content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.4),transparent 60%);
+}
+
+/* =========================================================
+   AUTH SCREEN
+========================================================= */
+.auth-screen{
+  position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--brand) 16%, transparent), transparent 55%),
+    radial-gradient(circle at 85% 90%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 55%),
+    var(--bg);
+  padding:24px;
+}
+.auth-card{
+  width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:40px 36px;box-shadow:var(--shadow-lg);animation:mockIn .7s var(--ease) both;
+}
+.auth-card .logo{justify-content:center;margin-bottom:8px;}
+.auth-sub{text-align:center;font-size:14px;color:var(--ink-faint);margin-bottom:28px;}
+.auth-tabs{display:flex;background:var(--surface-2);border-radius:12px;padding:4px;margin-bottom:26px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--ink-faint);transition:all .3s var(--ease);}
+.auth-tab.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+.auth-form{display:none;flex-direction:column;gap:16px;}
+.auth-form.active{display:flex;}
+.auth-error{
+  font-size:13px;color:var(--danger);background:rgba(179,38,30,.08);padding:10px 14px;border-radius:10px;display:none;
+}
+.auth-error.show{display:block;}
+.auth-foot{text-align:center;margin-top:22px;font-size:13.5px;color:var(--ink-faint);}
+.auth-foot button{color:var(--brand);font-weight:700;}
+.demo-note{margin-top:18px;font-size:12px;color:var(--ink-faint);text-align:center;line-height:1.6;}
+
+/* =========================================================
+   SIDEBAR USER CARD & PROFILE
+========================================================= */
+.user-card{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--surface-2);
+  margin-bottom:18px;cursor:pointer;transition:background .25s var(--ease);
+}
+.user-card:hover{background:var(--surface-3);}
+.avatar{
+  width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;
+  overflow:hidden;
+}
+.avatar img{width:100%;height:100%;object-fit:cover;}
+.avatar.lg{width:88px;height:88px;font-size:28px;}
+.user-card .who{overflow:hidden;}
+.user-card b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-card span{font-size:12px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+
+.profile-head{display:flex;align-items:center;gap:22px;margin-bottom:8px;}
+.avatar-upload{position:relative;cursor:pointer;}
+.avatar-upload .edit-badge{
+  position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;border:3px solid var(--surface);
+}
+.topbar-user-chip{display:flex;align-items:center;gap:10px;position:relative;}
+.topbar-user-chip .avatar{width:34px;height:34px;font-size:13px;}
+
+/* =========================================================
+   SHARE MODAL & PDF/SHARE BUTTONS
+========================================================= */
+.share-link-box{display:flex;gap:10px;margin:18px 0;}
+.share-link-box input{
+  flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);font-size:13px;font-family:var(--font-mono);
+}
+.share-options{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.share-options .btn{flex:1;}
+.link-warning{font-size:12px;color:var(--ink-faint);margin-top:14px;line-height:1.6;}
+
+/* =========================================================
+   PUBLIC INVOICE VIEW PAGE
+========================================================= */
+.public-invoice-page{min-height:100vh;padding:60px 20px 100px;background:var(--bg);}
+.public-invoice-wrap{max-width:760px;margin:0 auto;}
+.public-invoice-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.public-invoice-actions{display:flex;gap:10px;}
+.public-invoice-footer{text-align:center;margin-top:34px;font-size:13px;color:var(--ink-faint);}
+.public-invoice-footer a{color:var(--brand);font-weight:700;}
+.invalid-link{text-align:center;padding:100px 20px;}
+.invalid-link .ic{font-size:48px;margin-bottom:20px;}
+
+@media (max-width:640px){
+  .profile-head{flex-direction:column;text-align:center;}
+  .share-link-box{flex-direction:column;}
+}
+
 /* Print */
 @media print{
   body *{visibility:hidden;}
   .invoice-preview,.invoice-preview *{visibility:visible;}
   .invoice-preview{position:absolute;top:0;left:0;width:100%;box-shadow:none;}
+}
+@media print{
+  .public-invoice-topbar, .public-invoice-footer{display:none !important;}
 }

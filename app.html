@@ -8,6 +8,37 @@
 </head>
 <body class="app-body">
 
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+    <p class="auth-sub">Your studio, your invoices, your data.</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="signin">Sign in</button>
+      <button class="auth-tab" data-tab="signup">Create account</button>
+    </div>
+
+    <div class="auth-error" id="authError"></div>
+
+    <form class="auth-form active" id="signinForm">
+      <div class="field"><label>Email</label><input type="email" id="signinEmail" required placeholder="you@studio.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="signinPassword" required placeholder="••••••••"></div>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+
+    <form class="auth-form" id="signupForm">
+      <div class="field"><label>Full name</label><input type="text" id="signupName" required placeholder="Amara Chen"></div>
+      <div class="field"><label>Email</label><input type="email" id="signupEmail" required placeholder="you@studio.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="signupPassword" required placeholder="At least 6 characters"></div>
+      <button type="submit" class="btn btn-primary btn-block">Create account</button>
+    </form>
+
+    <div class="auth-foot" id="authFootText">New here? <button id="authFootBtn">Create an account</button></div>
+    <p class="demo-note">Accounts are stored securely on this device only — this is a self-contained demo login, not a synced cloud account.</p>
+  </div>
+</div>
+
 <div class="app-mobile-bar">
   <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
   <div style="display:flex;gap:10px;align-items:center;">
@@ -22,6 +53,14 @@
   <aside class="sidebar" id="sidebar">
     <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
 
+    <div class="user-card" data-view="profile" id="sidebarUserCard">
+      <div class="avatar" id="sidebarAvatar">U</div>
+      <div class="who">
+        <b id="sidebarUserName">Your studio</b>
+        <span id="sidebarUserEmail">you@studio.com</span>
+      </div>
+    </div>
+
     <span class="sidebar-section-label">Workspace</span>
     <a href="#" class="side-link active" data-view="dashboard"><span class="ic">◆</span> Dashboard</a>
     <a href="#" class="side-link" data-view="invoices"><span class="ic">▤</span> Invoices</a>
@@ -30,9 +69,10 @@
     <span class="sidebar-section-label">Settings</span>
     <a href="#" class="side-link" data-view="company"><span class="ic">⌂</span> Company Details</a>
     <a href="#" class="side-link" data-view="bank"><span class="ic">⌘</span> Bank Details</a>
+    <a href="#" class="side-link" data-view="profile"><span class="ic">☺</span> Profile</a>
 
     <div class="sidebar-foot">
-      <a href="index.html" style="font-size:13px;color:var(--ink-faint);">← Back to site</a>
+      <button id="logoutBtn" style="font-size:13px;color:var(--ink-faint);font-weight:600;">↩ Log out</button>
       <button class="theme-switch" id="themeSwitchDesktop" aria-label="Toggle dark mode"><span class="knob"></span></button>
     </div>
   </aside>
@@ -150,8 +190,10 @@
           <h1 id="editorTitle">Create Invoice</h1>
           <p>Fill in the details below — the preview updates as you type.</p>
         </div>
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Print / Save PDF</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Print</button>
+          <button class="btn btn-ghost btn-sm" id="downloadPdfBtn">⬇ Download PDF</button>
+          <button class="btn btn-ghost btn-sm" id="shareBtn">🔗 Share link</button>
           <button class="btn btn-primary btn-sm" id="saveInvoiceBtn">Save Invoice</button>
         </div>
       </div>
@@ -318,6 +360,50 @@
       </div>
     </section>
 
+    <!-- PROFILE -->
+    <section class="view" id="view-profile">
+      <div class="app-topbar">
+        <div>
+          <h1>Profile</h1>
+          <p>Manage your account.</p>
+        </div>
+      </div>
+
+      <div class="panel" style="max-width:640px;">
+        <div class="profile-head">
+          <div class="avatar-upload" id="profileAvatarUpload">
+            <div class="avatar lg" id="profileAvatar">U</div>
+            <div class="edit-badge">✎</div>
+            <input type="file" id="profileAvatarInput" accept="image/*" style="display:none;">
+          </div>
+          <div>
+            <h3 id="profileNameDisplay">Your name</h3>
+            <p style="margin-top:4px;" id="profileEmailDisplay">you@studio.com</p>
+          </div>
+        </div>
+
+        <div class="panel-head" style="margin-top:26px;"><h3>Account details</h3></div>
+        <div class="form-grid">
+          <div class="field full"><label>Full name</label><input type="text" id="profileName" placeholder="Your name"></div>
+          <div class="field full"><label>Email</label><input type="email" id="profileEmail" placeholder="you@studio.com"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="saveProfileBtn">Save profile</button>
+
+        <div class="panel-head" style="margin-top:34px;"><h3>Change password</h3></div>
+        <div class="form-grid">
+          <div class="field"><label>Current password</label><input type="password" id="currentPassword"></div>
+          <div class="field"><label>New password</label><input type="password" id="newPassword" placeholder="At least 6 characters"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="changePasswordBtn">Update password</button>
+
+        <div class="panel-head" style="margin-top:34px;"><h3>Account actions</h3></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" id="profileLogoutBtn">Log out</button>
+          <button class="btn btn-danger btn-sm" id="deleteAccountBtn">Delete account</button>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -333,8 +419,43 @@
   </div>
 </div>
 
+<!-- Share invoice modal -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal" style="max-width:520px;">
+    <h3>Share this invoice</h3>
+    <p>Anyone with this link can view a read-only version of this invoice — no account needed. The link works once this site is live at a public URL.</p>
+    <div class="share-link-box">
+      <input type="text" id="shareLinkInput" readonly>
+      <button class="btn btn-primary btn-sm" id="copyShareLinkBtn">Copy</button>
+    </div>
+    <div class="share-options">
+      <button class="btn btn-ghost btn-sm" id="nativeShareBtn">📤 Share via device</button>
+      <a class="btn btn-ghost btn-sm" id="whatsappShareBtn" target="_blank">WhatsApp</a>
+      <a class="btn btn-ghost btn-sm" id="emailShareBtn">Email</a>
+    </div>
+    <p class="link-warning">Tip: keep your logo small — very large logos make the link long. For unlimited-size sharing later, this would need a small backend to host the invoice data.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="closeShareModalBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete account confirmation -->
+<div class="modal-overlay" id="deleteAccountModal">
+  <div class="modal">
+    <h3>Delete your account?</h3>
+    <p>This removes your profile, saved company & bank details, and every invoice on this device. This can't be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="cancelDeleteAccountBtn">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirmDeleteAccountBtn">Delete everything</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toastWrap"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="script.js"></script>
 <script src="main.js"></script>
 </body>

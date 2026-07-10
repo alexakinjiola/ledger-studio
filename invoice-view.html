@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice — Ledger Studio</title>
+<meta name="description" content="View and download this invoice.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="public-invoice-page">
+  <div class="public-invoice-wrap">
+
+    <div class="public-invoice-topbar">
+      <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+      <div class="public-invoice-actions" id="publicActions" style="display:none;">
+        <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode"><span class="knob"></span></button>
+        <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Print</button>
+        <button class="btn btn-primary btn-sm" id="downloadPdfBtn">⬇ Download PDF</button>
+      </div>
+    </div>
+
+    <div id="invoiceContainer"></div>
+
+    <div class="invalid-link" id="invalidState" style="display:none;">
+      <div class="ic">📄</div>
+      <h3>This invoice link isn't valid</h3>
+      <p style="margin-top:10px;">The link may be incomplete, or it may have been copied incorrectly. Ask the sender to share it again.</p>
+    </div>
+
+    <div class="public-invoice-footer" id="publicFooter" style="display:none;">
+      Sent with <a href="index.html">Ledger Studio</a> — create your own invoices in minutes.
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="script.js"></script>
+<script src="invoice-view.js"></script>
+</body>
+</html>

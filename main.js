@@ -1,17 +1,20 @@
 /* =========================================================
    LEDGER STUDIO — App logic (app.html only)
-   Handles: views, invoices (CRUD), dashboard, company & bank
-   settings, logo upload, live invoice preview, printing.
-   Data persists in localStorage — everything stays on this device.
+   Handles: accounts/auth, views, invoices (CRUD), dashboard,
+   company & bank settings, profile, logo upload, live invoice
+   preview, printing, PDF download, and shareable invoice links.
+
+   IMPORTANT — about accounts: this is a self-contained, front-end
+   only demo login. Accounts, passwords and invoices are stored in
+   this browser's localStorage on this device only. There is no
+   server, so nothing here is synced across devices and the
+   password "hashing" below is NOT cryptographically secure.
+   For real production accounts you'd want a backend with proper
+   authentication (e.g. hashed + salted passwords in a database).
 ========================================================= */
 
 (function(){
   "use strict";
-
-  /* ---------------- Storage keys ---------------- */
-  const K_COMPANY   = "ls_company";
-  const K_BANK      = "ls_bank";
-  const K_INVOICES  = "ls_invoices";
 
   /* ---------------- Storage helpers ---------------- */
   const store = {
@@ -21,22 +24,14 @@
         return raw ? JSON.parse(raw) : fallback;
       }catch(e){ return fallback; }
     },
-    set(key, value){
-      localStorage.setItem(key, JSON.stringify(value));
-    }
+    set(key, value){ localStorage.setItem(key, JSON.stringify(value)); },
+    remove(key){ localStorage.removeItem(key); }
   };
 
-  let company  = store.get(K_COMPANY, {name:"", email:"", phone:"", address:"", logo:""});
-  let bank     = store.get(K_BANK, {bankName:"", accountName:"", accountNumber:"", iban:"", swift:""});
-  let invoices = store.get(K_INVOICES, []);
+  const K_ACCOUNTS = "ls_accounts";
+  const K_SESSION  = "ls_session";
 
-  let currentDurationRange = "all";
-  let currentStatusFilter  = "all";
-  let currentSearch        = "";
-  let editingInvoiceId     = null;
-  let pendingDeleteId      = null;
-
-  const uid = ()=> "inv_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const uid = (p)=> (p||"id_") + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   const fmtMoney = (num, symbol)=> (symbol||"₦") + Number(num||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtDate = (d)=>{
     if(!d) return "—";
@@ -44,8 +39,46 @@
     if(isNaN(dt)) return d;
     return dt.toLocaleDateString(undefined,{month:"short", day:"numeric", year:"numeric"});
   };
+  function escapeHtml(str){
+    return String(str||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  }
+  function simpleHash(str){
+    let hash = 5381;
+    for(let i=0;i<str.length;i++){ hash = ((hash << 5) + hash) + str.charCodeAt(i); hash = hash & hash; }
+    return "h" + Math.abs(hash).toString(36);
+  }
+  function b64EncodeUnicode(str){
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p1)=>String.fromCharCode("0x"+p1)));
+  }
 
-  /* ---------------- Toast ---------------- */
+  /* ---------------- Per-user data ---------------- */
+  let currentUser = null;
+  let company  = {name:"", email:"", phone:"", address:"", logo:""};
+  let bank     = {bankName:"", accountName:"", accountNumber:"", iban:"", swift:""};
+  let invoices = [];
+
+  function keyCompany(){ return "ls_company_" + currentUser.id; }
+  function keyBank(){ return "ls_bank_" + currentUser.id; }
+  function keyInvoices(){ return "ls_invoices_" + currentUser.id; }
+
+  function loadUserData(){
+    company  = store.get(keyCompany(), {name:"", email:"", phone:"", address:"", logo:""});
+    bank     = store.get(keyBank(), {bankName:"", accountName:"", accountNumber:"", iban:"", swift:""});
+    invoices = store.get(keyInvoices(), []);
+  }
+  function saveCompanyData(){ store.set(keyCompany(), company); }
+  function saveBankData(){ store.set(keyBank(), bank); }
+  function saveInvoicesData(){ store.set(keyInvoices(), invoices); }
+
+  let currentDurationRange = "all";
+  let currentStatusFilter  = "all";
+  let currentSearch        = "";
+  let editingInvoiceId     = null;
+  let pendingDeleteId      = null;
+
+  /* =========================================================
+     TOAST
+  ========================================================= */
   function toast(msg, type){
     const wrap = document.getElementById("toastWrap");
     if(!wrap) return;
@@ -56,7 +89,122 @@
     setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateY(10px)"; setTimeout(()=>el.remove(), 300); }, 2600);
   }
 
-  /* ---------------- View switching ---------------- */
+  /* =========================================================
+     AUTH
+  ========================================================= */
+  const authScreen = document.getElementById("authScreen");
+
+  function getAccounts(){ return store.get(K_ACCOUNTS, []); }
+  function setAccounts(list){ store.set(K_ACCOUNTS, list); }
+
+  function findAccountByEmail(email){
+    return getAccounts().find(a => a.email.toLowerCase() === email.toLowerCase());
+  }
+
+  function showAuthError(msg){
+    const el = document.getElementById("authError");
+    el.textContent = msg;
+    el.classList.add("show");
+  }
+  function clearAuthError(){
+    document.getElementById("authError").classList.remove("show");
+  }
+
+  document.querySelectorAll(".auth-tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      document.querySelectorAll(".auth-tab").forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+      const which = tab.getAttribute("data-tab");
+      document.getElementById("signinForm").classList.toggle("active", which==="signin");
+      document.getElementById("signupForm").classList.toggle("active", which==="signup");
+      document.getElementById("authFootText").innerHTML = which==="signin"
+        ? 'New here? <button id="authFootBtn">Create an account</button>'
+        : 'Already have an account? <button id="authFootBtn">Sign in</button>';
+      bindAuthFootBtn(which);
+      clearAuthError();
+    });
+  });
+
+  function bindAuthFootBtn(currentTab){
+    const btn = document.getElementById("authFootBtn");
+    if(!btn) return;
+    btn.addEventListener("click", ()=>{
+      const target = currentTab === "signin" ? "signup" : "signin";
+      document.querySelector('.auth-tab[data-tab="'+target+'"]').click();
+    });
+  }
+  bindAuthFootBtn("signin");
+
+  document.getElementById("signinForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    clearAuthError();
+    const email = document.getElementById("signinEmail").value.trim();
+    const password = document.getElementById("signinPassword").value;
+    const account = findAccountByEmail(email);
+    if(!account || account.passwordHash !== simpleHash(password)){
+      showAuthError("That email and password don't match our records.");
+      return;
+    }
+    logIn(account);
+  });
+
+  document.getElementById("signupForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    clearAuthError();
+    const name = document.getElementById("signupName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value;
+    if(password.length < 6){ showAuthError("Password should be at least 6 characters."); return; }
+    if(findAccountByEmail(email)){ showAuthError("An account with that email already exists — try signing in."); return; }
+
+    const account = {
+      id: uid("user_"),
+      name, email,
+      passwordHash: simpleHash(password),
+      avatar: "",
+      createdAt: new Date().toISOString()
+    };
+    const accounts = getAccounts();
+    accounts.push(account);
+    setAccounts(accounts);
+    toast("Account created — welcome!");
+    logIn(account);
+  });
+
+  function logIn(account){
+    currentUser = account;
+    store.set(K_SESSION, account.id);
+    authScreen.style.display = "none";
+    loadUserData();
+    initAppForUser();
+  }
+
+  function logOut(){
+    store.remove(K_SESSION);
+    currentUser = null;
+    authScreen.style.display = "flex";
+    document.getElementById("signinForm").reset();
+    document.getElementById("signupForm").reset();
+    clearAuthError();
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", logOut);
+  document.getElementById("profileLogoutBtn").addEventListener("click", logOut);
+
+  function tryResumeSession(){
+    const sessionId = localStorage.getItem(K_SESSION) ? JSON.parse(localStorage.getItem(K_SESSION)) : null;
+    if(!sessionId) return false;
+    const account = getAccounts().find(a=>a.id === sessionId);
+    if(!account) return false;
+    currentUser = account;
+    authScreen.style.display = "none";
+    loadUserData();
+    return true;
+  }
+
+  /* =========================================================
+     VIEW SWITCHING
+  ========================================================= */
   function showView(name){
     document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     const target = document.getElementById("view-" + name);
@@ -69,14 +217,19 @@
     if(name === "invoices") renderInvoiceTable();
     if(name === "company") loadCompanyForm();
     if(name === "bank") loadBankForm();
+    if(name === "profile") loadProfileForm();
     window.scrollTo({top:0, behavior:"smooth"});
+
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+    if(sidebar){ sidebar.classList.remove("open"); overlay && overlay.classList.remove("open"); }
   }
 
   document.querySelectorAll("[data-view]").forEach(el=>{
     el.addEventListener("click", (e)=>{
       e.preventDefault();
       const view = el.getAttribute("data-view");
-      if(view === "editor" && el.id === "newInvoiceLink" || (view === "editor" && el.textContent.includes("New"))){
+      if(view === "editor" && (el.id === "newInvoiceLink" || el.textContent.includes("New"))){
         resetEditor();
       }
       showView(view);
@@ -97,7 +250,6 @@
 
   function renderDashboard(){
     const filtered = invoices.filter(inv => withinRange(inv.issueDate, currentDurationRange));
-
     const paid = filtered.filter(i=>i.status === "paid");
     const unpaid = filtered.filter(i=>i.status === "unpaid");
 
@@ -240,7 +392,6 @@
     renderInvoiceTable();
   });
 
-  /* Delete modal */
   document.getElementById("cancelDeleteBtn").addEventListener("click", ()=>{
     pendingDeleteId = null;
     document.getElementById("deleteModal").classList.remove("open");
@@ -248,7 +399,7 @@
   document.getElementById("confirmDeleteBtn").addEventListener("click", ()=>{
     if(pendingDeleteId){
       invoices = invoices.filter(i=>i.id !== pendingDeleteId);
-      store.set(K_INVOICES, invoices);
+      saveInvoicesData();
       toast("Invoice deleted");
     }
     pendingDeleteId = null;
@@ -264,10 +415,10 @@
     const row = document.createElement("div");
     row.className = "line-item";
     row.innerHTML = `
-      <input type="text" class="li-desc" placeholder="Description of work" value="${escapeAttr(item?.desc || "")}">
+      <input type="text" class="li-desc" placeholder="Description of work" value="${escapeHtml(item?.desc || "")}">
       <input type="number" class="li-qty" placeholder="Qty" min="0" value="${item?.qty ?? 1}">
       <input type="number" class="li-rate" placeholder="Rate" min="0" value="${item?.rate ?? 0}">
-      <div class="amt">$0.00</div>
+      <div class="amt">₦0.00</div>
       <button class="icon-btn del li-remove" title="Remove">✕</button>`;
     row.querySelectorAll("input").forEach(inp=> inp.addEventListener("input", recalc));
     row.querySelector(".li-remove").addEventListener("click", ()=>{ row.remove(); recalc(); });
@@ -311,7 +462,7 @@
     document.getElementById("calcTotal").textContent = fmtMoney(total, symbol);
 
     updatePreview({subtotal, discountAmt, taxAmt, total, items, symbol});
-    return {subtotal, discountAmt, taxAmt, total};
+    return {subtotal, discountAmt, taxAmt, total, items, symbol};
   }
 
   function updatePreview(calc){
@@ -434,7 +585,7 @@
       return;
     }
     const data = {
-      id: editingInvoiceId || uid(),
+      id: editingInvoiceId || uid("inv_"),
       number: document.getElementById("invoiceNumber").value.trim() || nextInvoiceNumber(),
       clientName,
       clientEmail: document.getElementById("clientEmail").value.trim(),
@@ -448,6 +599,8 @@
       notes: document.getElementById("invoiceNotes").value.trim(),
       items: getLineItems(),
       subtotal: calc.subtotal,
+      discountAmt: calc.discountAmt,
+      taxAmt: calc.taxAmt,
       total: calc.total,
       createdAt: editingInvoiceId ? (invoices.find(i=>i.id===editingInvoiceId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -460,7 +613,7 @@
       invoices.push(data);
       toast("Invoice saved");
     }
-    store.set(K_INVOICES, invoices);
+    saveInvoicesData();
     editingInvoiceId = data.id;
     document.getElementById("invoiceId").value = data.id;
     document.getElementById("editorTitle").textContent = "Edit Invoice";
@@ -468,6 +621,90 @@
   });
 
   document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+
+  /* ---------------- Download PDF (editor) ---------------- */
+  document.getElementById("downloadPdfBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("downloadPdfBtn");
+    const original = btn.textContent;
+    btn.textContent = "Generating…";
+    try{
+      const el = document.getElementById("invoicePreview");
+      const canvas = await html2canvas(el, {scale:2, backgroundColor:"#ffffff"});
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p","mm","a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
+      const number = document.getElementById("invoiceNumber").value.trim() || "invoice";
+      pdf.save(number + ".pdf");
+      toast("PDF downloaded");
+    }catch(err){
+      toast("Couldn't generate the PDF — try again", "error");
+    }
+    btn.textContent = original;
+  });
+
+  /* ---------------- Share link (editor) ---------------- */
+  const shareModal = document.getElementById("shareModal");
+  document.getElementById("shareBtn").addEventListener("click", ()=>{
+    const calc = recalc();
+    const clientName = document.getElementById("clientName").value.trim();
+    if(!clientName){ toast("Add a client name first", "error"); return; }
+
+    const payload = {
+      number: document.getElementById("invoiceNumber").value.trim(),
+      clientName,
+      clientAddress: document.getElementById("clientAddress").value.trim(),
+      issueDate: document.getElementById("issueDate").value,
+      dueDate: document.getElementById("dueDate").value,
+      status: document.getElementById("invoiceStatus").value,
+      currency: document.getElementById("currency").value,
+      items: calc.items.filter(it => it.desc || it.qty || it.rate),
+      subtotal: calc.subtotal,
+      discountAmt: calc.discountAmt,
+      taxAmt: calc.taxAmt,
+      total: calc.total,
+      notes: document.getElementById("invoiceNotes").value.trim(),
+      companyName: company.name,
+      companyEmail: company.email,
+      companyPhone: company.phone,
+      companyAddress: company.address,
+      companyLogo: company.logo,
+      bank: bank
+    };
+
+    const encoded = encodeURIComponent(b64EncodeUnicode(JSON.stringify(payload)));
+    const link = new URL("invoice-view.html", window.location.href).toString() + "#d=" + encoded;
+
+    document.getElementById("shareLinkInput").value = link;
+    document.getElementById("whatsappShareBtn").href = "https://wa.me/?text=" + encodeURIComponent("Here's your invoice: " + link);
+    document.getElementById("emailShareBtn").href = "mailto:" + encodeURIComponent(document.getElementById("clientEmail").value.trim()) +
+      "?subject=" + encodeURIComponent("Invoice " + payload.number) + "&body=" + encodeURIComponent("Hi " + clientName + ",\n\nHere is your invoice: " + link);
+
+    shareModal.classList.add("open");
+  });
+  document.getElementById("closeShareModalBtn").addEventListener("click", ()=> shareModal.classList.remove("open"));
+  document.getElementById("copyShareLinkBtn").addEventListener("click", async ()=>{
+    const input = document.getElementById("shareLinkInput");
+    try{
+      await navigator.clipboard.writeText(input.value);
+      toast("Link copied to clipboard");
+    }catch(e){
+      input.select();
+      document.execCommand("copy");
+      toast("Link copied to clipboard");
+    }
+  });
+  document.getElementById("nativeShareBtn").addEventListener("click", async ()=>{
+    const link = document.getElementById("shareLinkInput").value;
+    if(navigator.share){
+      try{ await navigator.share({title:"Invoice", url: link}); }catch(e){}
+    } else {
+      toast("Device sharing isn't supported here — link copied instead");
+      try{ await navigator.clipboard.writeText(link); }catch(e){}
+    }
+  });
 
   /* =========================================================
      COMPANY SETTINGS
@@ -482,11 +719,7 @@
 
   function updateLogoPreview(){
     const preview = document.getElementById("logoPreview");
-    if(company.logo){
-      preview.innerHTML = `<img src="${company.logo}" alt="Company logo">`;
-    } else {
-      preview.innerHTML = "🏢";
-    }
+    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : "🏢";
   }
 
   const logoUpload = document.getElementById("logoUpload");
@@ -531,7 +764,7 @@
       address: document.getElementById("companyAddress").value.trim(),
       logo: company.logo || ""
     };
-    store.set(K_COMPANY, company);
+    saveCompanyData();
     toast("Company details saved");
   });
 
@@ -554,17 +787,106 @@
       iban: document.getElementById("iban").value.trim(),
       swift: document.getElementById("swift").value.trim()
     };
-    store.set(K_BANK, bank);
+    saveBankData();
     toast("Bank details saved");
   });
 
-  /* ---------------- utils ---------------- */
-  function escapeHtml(str){
-    return String(str||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  /* =========================================================
+     PROFILE
+  ========================================================= */
+  function initials(name){
+    if(!name) return "U";
+    return name.trim().split(/\s+/).slice(0,2).map(s=>s[0].toUpperCase()).join("");
   }
-  function escapeAttr(str){ return escapeHtml(str); }
 
-  /* ---------------- init ---------------- */
-  resetEditor();
-  renderDashboard();
+  function updateSidebarUser(){
+    document.getElementById("sidebarUserName").textContent = currentUser.name || "Your studio";
+    document.getElementById("sidebarUserEmail").textContent = currentUser.email || "";
+    const av = document.getElementById("sidebarAvatar");
+    av.innerHTML = currentUser.avatar ? `<img src="${currentUser.avatar}" alt="">` : initials(currentUser.name);
+  }
+
+  function loadProfileForm(){
+    document.getElementById("profileName").value = currentUser.name || "";
+    document.getElementById("profileEmail").value = currentUser.email || "";
+    document.getElementById("profileNameDisplay").textContent = currentUser.name || "";
+    document.getElementById("profileEmailDisplay").textContent = currentUser.email || "";
+    const av = document.getElementById("profileAvatar");
+    av.innerHTML = currentUser.avatar ? `<img src="${currentUser.avatar}" alt="">` : initials(currentUser.name);
+  }
+
+  document.getElementById("profileAvatarUpload").addEventListener("click", ()=>{
+    document.getElementById("profileAvatarInput").click();
+  });
+  document.getElementById("profileAvatarInput").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith("image/")){ toast("Please upload an image file", "error"); return; }
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      currentUser.avatar = ev.target.result;
+      persistCurrentUser();
+      loadProfileForm();
+      updateSidebarUser();
+      toast("Profile photo updated");
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function persistCurrentUser(){
+    const accounts = getAccounts().map(a => a.id === currentUser.id ? currentUser : a);
+    setAccounts(accounts);
+  }
+
+  document.getElementById("saveProfileBtn").addEventListener("click", ()=>{
+    const name = document.getElementById("profileName").value.trim();
+    const email = document.getElementById("profileEmail").value.trim();
+    if(!name || !email){ toast("Name and email can't be empty", "error"); return; }
+    const clash = findAccountByEmail(email);
+    if(clash && clash.id !== currentUser.id){ toast("Another account already uses that email", "error"); return; }
+    currentUser.name = name;
+    currentUser.email = email;
+    persistCurrentUser();
+    loadProfileForm();
+    updateSidebarUser();
+    toast("Profile saved");
+  });
+
+  document.getElementById("changePasswordBtn").addEventListener("click", ()=>{
+    const current = document.getElementById("currentPassword").value;
+    const next = document.getElementById("newPassword").value;
+    if(simpleHash(current) !== currentUser.passwordHash){ toast("Current password is incorrect", "error"); return; }
+    if(next.length < 6){ toast("New password should be at least 6 characters", "error"); return; }
+    currentUser.passwordHash = simpleHash(next);
+    persistCurrentUser();
+    document.getElementById("currentPassword").value = "";
+    document.getElementById("newPassword").value = "";
+    toast("Password updated");
+  });
+
+  const deleteAccountModal = document.getElementById("deleteAccountModal");
+  document.getElementById("deleteAccountBtn").addEventListener("click", ()=> deleteAccountModal.classList.add("open"));
+  document.getElementById("cancelDeleteAccountBtn").addEventListener("click", ()=> deleteAccountModal.classList.remove("open"));
+  document.getElementById("confirmDeleteAccountBtn").addEventListener("click", ()=>{
+    store.remove(keyCompany());
+    store.remove(keyBank());
+    store.remove(keyInvoices());
+    setAccounts(getAccounts().filter(a=>a.id !== currentUser.id));
+    deleteAccountModal.classList.remove("open");
+    toast("Account deleted");
+    logOut();
+  });
+
+  /* =========================================================
+     INIT
+  ========================================================= */
+  function initAppForUser(){
+    updateSidebarUser();
+    resetEditor();
+    renderDashboard();
+  }
+
+  if(tryResumeSession()){
+    initAppForUser();
+  }
 })();
