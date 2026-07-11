@@ -122,7 +122,11 @@
     el.textContent = msg;
     el.classList.add("show");
   }
-  function clearAuthError(){ document.getElementById("authError").classList.remove("show"); }
+  function clearAuthError(){
+    document.getElementById("authError").classList.remove("show");
+    const resendBox = document.getElementById("resendBox");
+    if(resendBox) resendBox.style.display = "none";
+  }
 
   document.querySelectorAll(".auth-tab").forEach(tab=>{
     tab.addEventListener("click", ()=>{
@@ -156,11 +160,82 @@
     const done = setBusy(document.getElementById("signinSubmitBtn"), "Signing in…");
     try{
       const { data, error } = await supa.auth.signInWithPassword({ email, password });
-      if(error){ showAuthError(friendlyError(error)); return; }
+      if(error){
+        showAuthError(friendlyError(error));
+        if(/confirm/i.test(error.message || "")) document.getElementById("resendBox").style.display = "block";
+        return;
+      }
       await handleSignedIn(data.user);
     }catch(err){
       console.error(err);
       showAuthError(friendlyError(err));
+    }finally{
+      done();
+    }
+  });
+
+  document.getElementById("resendConfirmationBtn").addEventListener("click", async ()=>{
+    const email = document.getElementById("signinEmail").value.trim();
+    if(!email){ toast("Enter your email above first", "error"); return; }
+    const btn = document.getElementById("resendConfirmationBtn");
+    const done = setBusy(btn, "Sending…");
+    try{
+      const { error } = await supa.auth.resendConfirmation(email);
+      if(error){ toast(friendlyError(error), "error"); return; }
+      toast("Confirmation email sent again — check your inbox");
+    }catch(err){
+      toast(friendlyError(err), "error");
+    }finally{
+      done();
+    }
+  });
+
+  document.getElementById("forgotPasswordBtn").addEventListener("click", async ()=>{
+    const email = document.getElementById("signinEmail").value.trim();
+    if(!email){
+      showAuthError("Enter your email above first, then click Forgot password.");
+      document.getElementById("signinEmail").focus();
+      return;
+    }
+    clearAuthError();
+    const btn = document.getElementById("forgotPasswordBtn");
+    const done = setBusy(btn, "Sending…");
+    try{
+      const { error } = await supa.auth.resetPasswordForEmail(email);
+      if(error){ showAuthError(friendlyError(error)); return; }
+      toast("Password reset link sent — check your email");
+    }catch(err){
+      showAuthError(friendlyError(err));
+    }finally{
+      done();
+    }
+  });
+
+  document.getElementById("recoveryForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const recoveryErrorEl = document.getElementById("recoveryError");
+    recoveryErrorEl.classList.remove("show");
+    const pw = document.getElementById("recoveryPassword").value;
+    if(pw.length < 6){
+      recoveryErrorEl.textContent = "Password should be at least 6 characters.";
+      recoveryErrorEl.classList.add("show");
+      return;
+    }
+    const done = setBusy(document.getElementById("recoverySubmitBtn"), "Saving…");
+    try{
+      const { data, error } = await supa.auth.updateUser({ password: pw });
+      if(error){
+        recoveryErrorEl.textContent = friendlyError(error);
+        recoveryErrorEl.classList.add("show");
+        return;
+      }
+      supa.auth.clearPasswordRecovery();
+      document.getElementById("recoveryScreen").style.display = "none";
+      toast("Password updated — welcome back!");
+      await handleSignedIn(data.user);
+    }catch(err){
+      recoveryErrorEl.textContent = friendlyError(err);
+      recoveryErrorEl.classList.add("show");
     }finally{
       done();
     }
@@ -423,8 +498,8 @@
         <td class="mono">${fmtMoney(inv.total, inv.currency)}</td>
         <td>
           <div class="row-actions">
-            <button class="icon-btn" title="Edit" data-edit="${inv.id}">✎</button>
-            <button class="icon-btn del" title="Delete" data-del="${inv.id}">🗑</button>
+            <button class="icon-btn" title="Edit" data-edit="${inv.id}"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+            <button class="icon-btn del" title="Delete" data-del="${inv.id}"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
           </div>
         </td>`;
       body.appendChild(tr);
@@ -490,7 +565,7 @@
       <input type="number" class="li-qty" placeholder="Qty" min="0" value="${item?.qty ?? 1}">
       <input type="number" class="li-rate" placeholder="Rate" min="0" value="${item?.rate ?? 0}">
       <div class="amt">₦0.00</div>
-      <button class="icon-btn del li-remove" title="Remove">✕</button>`;
+      <button class="icon-btn del li-remove" title="Remove"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
     row.querySelectorAll("input").forEach(inp=> inp.addEventListener("input", recalc));
     row.querySelector(".li-remove").addEventListener("click", ()=>{ row.remove(); recalc(); });
     return row;
@@ -809,7 +884,7 @@
   }
   function updateLogoPreview(){
     const preview = document.getElementById("logoPreview");
-    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : "🏢";
+    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : '<svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
   }
 
   const logoUpload = document.getElementById("logoUpload");
@@ -1031,5 +1106,16 @@
   /* =========================================================
      INIT
   ========================================================= */
-  tryResumeSession();
+  /* =========================================================
+     INIT
+  ========================================================= */
+  function init(){
+    if(supa.auth.isPasswordRecovery && supa.auth.isPasswordRecovery()){
+      authScreen.style.display = "none";
+      document.getElementById("recoveryScreen").style.display = "flex";
+      return;
+    }
+    tryResumeSession();
+  }
+  init();
 })();

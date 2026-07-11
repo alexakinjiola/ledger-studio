@@ -64,6 +64,34 @@ const SUPABASE_ANON_KEY = "sb_publishable_Nzxw-dAc_S9otrNboi2_7A_7vgPs3Wm";
     return { message: "Couldn't reach Supabase — check your internet connection and that SUPABASE_URL is correct. (" + (e.message || e) + ")" };
   }
 
+  function currentRedirectUrl(){
+    return window.location.origin + window.location.pathname;
+  }
+
+  /* ---------------- Password recovery link detection ----------------
+     When someone clicks a "reset password" email link, Supabase sends
+     them back here with #access_token=...&type=recovery in the URL.
+     We catch that on load, stash the session, and strip it from the
+     visible URL so a refresh doesn't resubmit sensitive tokens. ---- */
+  let pendingRecovery = false;
+  (function handleRecoveryRedirect(){
+    const hash = window.location.hash;
+    if(!hash || hash.length < 2) return;
+    const params = new URLSearchParams(hash.slice(1));
+    const accessToken = params.get("access_token");
+    const type = params.get("type");
+    if(accessToken && type === "recovery"){
+      storeSession({
+        access_token: accessToken,
+        refresh_token: params.get("refresh_token"),
+        expires_at: Math.floor(Date.now()/1000) + Number(params.get("expires_in") || 3600),
+        user: null
+      });
+      pendingRecovery = true;
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  })();
+
   async function fetchUser(accessToken){
     try{
       const res = await fetch(AUTH_URL + "/user", {
@@ -110,7 +138,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_Nzxw-dAc_S9otrNboi2_7A_7vgPs3Wm";
   const auth = {
     async signUp({ email, password, options }){
       try{
-        const res = await fetch(AUTH_URL + "/signup", {
+        const res = await fetch(AUTH_URL + "/signup?redirect_to=" + encodeURIComponent(currentRedirectUrl()), {
           method: "POST",
           headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, data: (options && options.data) || {} })
@@ -178,7 +206,36 @@ const SUPABASE_ANON_KEY = "sb_publishable_Nzxw-dAc_S9otrNboi2_7A_7vgPs3Wm";
     // rather than relying on cross-tab auth events, so no real event bus is needed.
     onAuthStateChange(){
       return { data: { subscription: { unsubscribe(){} } } };
-    }
+    },
+
+    async resetPasswordForEmail(email){
+      try{
+        const res = await fetch(AUTH_URL + "/recover?redirect_to=" + encodeURIComponent(currentRedirectUrl()), {
+          method: "POST",
+          headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const json = await parseResponse(res);
+        if(!res.ok) return { error: toError(json, res) };
+        return { error: null };
+      }catch(e){ return { error: toNetworkError(e) }; }
+    },
+
+    async resendConfirmation(email){
+      try{
+        const res = await fetch(AUTH_URL + "/resend?redirect_to=" + encodeURIComponent(currentRedirectUrl()), {
+          method: "POST",
+          headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "signup", email })
+        });
+        const json = await parseResponse(res);
+        if(!res.ok) return { error: toError(json, res) };
+        return { error: null };
+      }catch(e){ return { error: toNetworkError(e) }; }
+    },
+
+    isPasswordRecovery(){ return pendingRecovery; },
+    clearPasswordRecovery(){ pendingRecovery = false; }
   };
 
   /* ---------------- Database (PostgREST) query builder ---------------- */
