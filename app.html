@@ -359,20 +359,25 @@
         <div class="preview-col">
           <div class="preview-label"><span class="live" aria-hidden="true"></span>Live preview</div>
           <div class="invoice-preview" id="invoicePreview">
-            <div class="prev-head">
-              <div style="display:flex;gap:14px;align-items:center;">
+            <div class="inv-band">
+              <div class="inv-brand">
                 <img class="prev-logo" id="prevLogo" src="" alt="" style="display:none;">
                 <div>
                   <h2 id="prevCompanyName">Your Company</h2>
-                  <div style="font-size:12.5px;color:#62668A;" id="prevCompanyMeta">company@email.com</div>
+                  <div class="inv-company-meta" id="prevCompanyMeta">company@email.com</div>
                 </div>
               </div>
-              <div class="prev-meta">
-                <div><b id="prevInvoiceNumber">LS-0001</b></div>
-                <div>Issued: <span id="prevIssueDate">—</span></div>
-                <div>Due: <span id="prevDueDate">—</span></div>
+              <div class="inv-id">
+                <span class="inv-kicker">Invoice</span>
+                <b id="prevInvoiceNumber">LS-0001</b>
                 <span class="prev-badge" id="prevStatusBadge">Draft</span>
               </div>
+            </div>
+
+            <div class="inv-tiles">
+              <div class="inv-tile"><span>Issued</span><b id="prevIssueDate">—</b></div>
+              <div class="inv-tile"><span>Due</span><b id="prevDueDate">—</b></div>
+              <div class="inv-tile due"><span>Amount due</span><b id="prevAmountDue">₦0.00</b></div>
             </div>
 
             <div class="prev-parties">
@@ -380,7 +385,7 @@
                 <h5>From</h5>
                 <p id="prevFromAddress">Your company address</p>
               </div>
-              <div style="text-align:right;">
+              <div>
                 <h5>Bill to</h5>
                 <p id="prevClientBlock">Client name<br>Client address</p>
               </div>
@@ -395,7 +400,7 @@
               <div class="row"><span>Subtotal</span><span id="prevSubtotal">$0.00</span></div>
               <div class="row"><span>Discount</span><span id="prevDiscount">-$0.00</span></div>
               <div class="row"><span>Tax</span><span id="prevTax">+$0.00</span></div>
-              <div class="row grand"><span>Total</span><span id="prevTotal">$0.00</span></div>
+              <div class="row grand"><span>Balance due</span><span id="prevTotal">$0.00</span></div>
             </div>
 
             <div class="prev-bank" id="prevBankBlock">
@@ -404,6 +409,7 @@
             </div>
 
             <div class="prev-notes" id="prevNotes"></div>
+            <div class="inv-foot"><span>Please pay by the due date shown above.</span><span class="mark"><i></i>Made with Ledger Studio</span></div>
           </div>
         </div>
       </div>

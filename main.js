@@ -637,7 +637,7 @@
 
     const clientName = document.getElementById("clientName").value || "Client name";
     const clientAddress = document.getElementById("clientAddress").value || "";
-    document.getElementById("prevClientBlock").innerHTML = escapeHtml(clientName) + (clientAddress ? "<br>" + escapeHtml(clientAddress).replace(/\n/g,"<br>") : "");
+    document.getElementById("prevClientBlock").innerHTML = "<b>" + escapeHtml(clientName) + "</b>" + (clientAddress ? "<br>" + escapeHtml(clientAddress).replace(/\n/g,"<br>") : "");
 
     const tbody = document.getElementById("prevLineItems");
     tbody.innerHTML = "";
@@ -652,6 +652,8 @@
     document.getElementById("prevDiscount").textContent = "-" + fmtMoney(calc.discountAmt, symbol);
     document.getElementById("prevTax").textContent = "+" + fmtMoney(calc.taxAmt, symbol);
     document.getElementById("prevTotal").textContent = fmtMoney(calc.total, symbol);
+    const amountDue = document.getElementById("prevAmountDue");
+    if(amountDue) amountDue.textContent = fmtMoney(calc.total, symbol);
 
     const bankBlock = document.getElementById("prevBankDetails");
     if(bank.accountNumber || bank.bankName){
@@ -798,13 +800,24 @@
     const done = setBusy(document.getElementById("downloadPdfBtn"), "Generating…");
     try{
       const el = document.getElementById("invoicePreview");
-      const canvas = await html2canvas(el, {scale:2, backgroundColor:"#ffffff"});
-      const imgData = canvas.toDataURL("image/png");
+      const canvas = await html2canvas(el, {
+        scale:2, backgroundColor:"#ffffff", windowWidth:1200, useCORS:true,
+        onclone:(doc)=>{ doc.getElementById("invoicePreview").classList.add("pdf-mode"); }
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.92);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF("p","mm","a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const imgHeight = (canvas.height * pageWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
+      // Long invoices continue onto extra A4 pages instead of being cut off
+      let offset = 0;
+      pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, imgHeight, "invoice", "FAST");
+      while(imgHeight - offset > pageHeight + 1){
+        offset += pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, -offset, pageWidth, imgHeight, "invoice", "FAST");
+      }
       const number = document.getElementById("invoiceNumber").value.trim() || "invoice";
       pdf.save(number + ".pdf");
       toast("PDF downloaded");
