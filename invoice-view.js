@@ -38,13 +38,22 @@
     const colors = {paid:["#E2F5EB","#0B7A44"], unpaid:["#FFF1D9","#8F5600"], draft:["#EEF0F6","#45486A"]};
     const statusColor = colors[data.status] || colors.draft;
 
-    const itemsHtml = (data.items || []).map(item => `
+    // Images arrive via the URL, so only accept well-formed image data URLs
+    const SAFE_IMG = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+    const safeImg = (src)=> (typeof src === "string" && SAFE_IMG.test(src)) ? src : "";
+    const logo = safeImg(data.companyLogo);
+
+    const itemsHtml = (data.items || []).map(item => {
+      const img = safeImg(item.image);
+      const desc = escapeHtml(item.desc || "Untitled item");
+      return `
       <tr>
-        <td>${escapeHtml(item.desc || "Untitled item")}</td>
+        <td>${img ? `<div class="item-cell"><img class="item-img" src="${img}" alt=""><span>${desc}</span></div>` : desc}</td>
         <td>${item.qty}</td>
         <td>${fmtMoney(item.rate, symbol)}</td>
         <td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
 
     const bankHtml = (data.bank && (data.bank.accountNumber || data.bank.bankName)) ? `
       ${data.bank.bankName ? "Bank: " + escapeHtml(data.bank.bankName) + "<br>" : ""}
@@ -58,7 +67,7 @@
       <div class="invoice-preview" id="invoicePreview">
         <div class="inv-band">
           <div class="inv-brand">
-            ${data.companyLogo ? `<img class="prev-logo" src="${data.companyLogo}" alt="">` : ""}
+            ${logo ? `<img class="prev-logo" src="${logo}" alt="">` : ""}
             <div>
               <h2>${escapeHtml(data.companyName || "Company")}</h2>
               <div class="inv-company-meta">${escapeHtml([data.companyEmail, data.companyPhone].filter(Boolean).join(" · "))}</div>

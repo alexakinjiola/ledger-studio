@@ -560,17 +560,90 @@
   /* =========================================================
      EDITOR — line items, calculations, preview
   ========================================================= */
+  const ITEM_IMG_MAX = 256;           // px, longest side
+  const ITEM_IMG_QUALITY = 0.8;       // JPEG quality
+  const SAFE_IMG = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+  const safeImg = (src)=> (typeof src === "string" && SAFE_IMG.test(src)) ? src : "";
+
+  // Shrink a photo in the browser so invoices stay light to save, share and export.
+  function compressImage(file){
+    return new Promise((resolve, reject)=>{
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = ()=>{
+        const scale = Math.min(1, ITEM_IMG_MAX / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";            // transparent PNGs get a clean white backing
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", ITEM_IMG_QUALITY));
+      };
+      img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error("Unreadable image")); };
+      img.src = url;
+    });
+  }
+
+  function paintItemPhoto(row){
+    const slot = row.querySelector(".li-photo");
+    const clear = row.querySelector(".li-photo-clear");
+    if(row._image){
+      slot.innerHTML = `<img src="${row._image}" alt="">`;
+      slot.classList.add("has-img");
+      slot.setAttribute("aria-label", "Change photo for this item");
+      clear.hidden = false;
+    } else {
+      slot.innerHTML = '<span class="ms" aria-hidden="true">add_photo_alternate</span>';
+      slot.classList.remove("has-img");
+      slot.setAttribute("aria-label", "Add a photo for this item");
+      clear.hidden = true;
+    }
+  }
+
+  async function setItemPhoto(row, file){
+    if(!file) return;
+    if(!file.type.startsWith("image/")){ toast("Please choose an image file", "error"); return; }
+    if(file.size > 10 * 1024 * 1024){ toast("Photo should be under 10MB", "error"); return; }
+    try{
+      row._image = await compressImage(file);
+      paintItemPhoto(row);
+      recalc();
+    }catch(err){
+      toast("Couldn't read that image, try another", "error");
+    }
+  }
+
   function newLineItemRow(item){
     const row = document.createElement("div");
     row.className = "line-item";
     row.innerHTML = `
+      <div class="li-photo-wrap">
+        <button type="button" class="li-photo" title="Item photo"></button>
+        <button type="button" class="li-photo-clear" aria-label="Remove photo" title="Remove photo" hidden><span class="ms" aria-hidden="true">close</span></button>
+        <input type="file" class="li-photo-input" accept="image/*" hidden>
+      </div>
       <input type="text" class="li-desc" placeholder="Description of work" aria-label="Description" value="${escapeHtml(item?.desc || "")}">
       <input type="number" class="li-qty" placeholder="Qty" aria-label="Quantity" min="0" value="${item?.qty ?? 1}">
       <input type="number" class="li-rate" placeholder="Rate" aria-label="Rate" min="0" value="${item?.rate ?? 0}">
       <div class="amt">₦0.00</div>
       <button class="icon-btn del li-remove" title="Remove" aria-label="Remove line item"><span class="ms" aria-hidden="true">close</span></button>`;
-    row.querySelectorAll("input").forEach(inp=> inp.addEventListener("input", recalc));
+    row.querySelectorAll("input:not([type=file])").forEach(inp=> inp.addEventListener("input", recalc));
     row.querySelector(".li-remove").addEventListener("click", ()=>{ row.remove(); recalc(); });
+
+    row._image = safeImg(item?.image);
+    const slot = row.querySelector(".li-photo");
+    const fileInput = row.querySelector(".li-photo-input");
+    slot.addEventListener("click", ()=> fileInput.click());
+    fileInput.addEventListener("change", ()=>{ setItemPhoto(row, fileInput.files[0]); fileInput.value = ""; });
+    row.querySelector(".li-photo-clear").addEventListener("click", ()=>{ row._image = ""; paintItemPhoto(row); recalc(); slot.focus(); });
+    ["dragenter","dragover"].forEach(evt=> slot.addEventListener(evt, e=>{ e.preventDefault(); slot.classList.add("dragover"); }));
+    ["dragleave","drop"].forEach(evt=> slot.addEventListener(evt, e=>{ e.preventDefault(); slot.classList.remove("dragover"); }));
+    slot.addEventListener("drop", e=> setItemPhoto(row, e.dataTransfer.files[0]));
+    paintItemPhoto(row);
     return row;
   }
 
@@ -584,7 +657,9 @@
       const desc = row.querySelector(".li-desc").value;
       const qty = Math.max(0, Number(row.querySelector(".li-qty").value) || 0);
       const rate = Math.max(0, Number(row.querySelector(".li-rate").value) || 0);
-      return {desc, qty, rate};
+      const item = {desc, qty, rate};
+      if(row._image) item.image = row._image;
+      return item;
     });
   }
 
@@ -642,9 +717,13 @@
     const tbody = document.getElementById("prevLineItems");
     tbody.innerHTML = "";
     calc.items.forEach(item=>{
-      if(!item.desc && !item.qty && !item.rate) return;
+      if(!item.desc && !item.qty && !item.rate && !item.image) return;
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${escapeHtml(item.desc || "Untitled item")}</td><td>${item.qty}</td><td>${fmtMoney(item.rate, symbol)}</td><td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>`;
+      const img = safeImg(item.image);
+      const descCell = img
+        ? `<div class="item-cell"><img class="item-img" src="${img}" alt=""><span>${escapeHtml(item.desc || "Untitled item")}</span></div>`
+        : escapeHtml(item.desc || "Untitled item");
+      tr.innerHTML = `<td>${descCell}</td><td>${item.qty}</td><td>${fmtMoney(item.rate, symbol)}</td><td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>`;
       tbody.appendChild(tr);
     });
 
@@ -842,7 +921,7 @@
       dueDate: document.getElementById("dueDate").value,
       status: document.getElementById("invoiceStatus").value,
       currency: document.getElementById("currency").value,
-      items: calc.items.filter(it => it.desc || it.qty || it.rate),
+      items: calc.items.filter(it => it.desc || it.qty || it.rate || it.image),
       subtotal: calc.subtotal,
       discountAmt: calc.discountAmt,
       taxAmt: calc.taxAmt,
