@@ -5,39 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About Us — Ledger Studio</title>
 <meta name="description" content="Why Ledger Studio exists, what we believe about invoicing, and the people building it.">
+<meta name="theme-color" content="#11122E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to content</a>
 
-<nav class="nav" id="nav">
+<nav class="nav" id="nav" aria-label="Main">
   <div class="container nav-inner">
-    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+    <a href="index.html" class="logo" aria-label="Ledger Studio home"><span class="logo-mark" aria-hidden="true">L</span>Ledger Studio</a>
     <div class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="index.html#features">Features</a>
       <a href="index.html#how">How it works</a>
-      <a href="about.html" class="active">About Us</a>
+      <a href="about.html" class="active" aria-current="page">About us</a>
     </div>
     <div class="nav-actions">
-      <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode"><span class="knob"></span></button>
-      <a href="app.html" class="btn btn-primary btn-sm">Get Started</a>
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <button class="theme-switch" id="themeSwitch" aria-label="Dark mode" aria-pressed="false"><span class="knob" aria-hidden="true"></span></button>
+      <a href="app.html" class="btn btn-primary btn-sm">Get started <span class="ms btn-ic" aria-hidden="true">arrow_forward</span></a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu" aria-controls="navLinks"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
 
+<main id="main">
+
 <section class="about-hero">
   <div class="container">
-    <span class="eyebrow">About Ledger Studio</span>
-    <h1 class="reveal">We think invoicing deserves better than a spreadsheet.</h1>
-    <p class="lead reveal" style="margin:24px auto 0;text-align:center;">Ledger Studio started as a simple question: why does the last step of getting paid — the invoice — so often look like an afterthought? We set out to make it the opposite.</p>
+    <span class="eyebrow"><span class="ms" aria-hidden="true">favorite</span>About Ledger Studio</span>
+    <h1 class="reveal">
+      <span class="tag-tilt t1" aria-hidden="true">Clear</span>
+      We think invoicing deserves better than a <span class="swoosh">spreadsheet.</span>
+      <span class="tag-tilt t2" aria-hidden="true">Calm</span>
+    </h1>
+    <p class="lead reveal">Ledger Studio started with a simple question: why does the last step of getting paid, the invoice, so often look like an afterthought? We set out to make it the opposite.</p>
   </div>
 </section>
 
-<section class="section" style="padding-top:40px;">
+<section class="section" style="padding-top:48px;padding-bottom:0;">
   <div class="container">
     <div class="stat-strip reveal-stagger">
-      <div class="stat"><b>2019</b><span>Idea sketched</span></div>
+      <div class="stat"><b>2019</b><span>Idea first sketched</span></div>
       <div class="stat"><b>4</b><span>Guiding values</span></div>
       <div class="stat"><b>0</b><span>Spreadsheets required</span></div>
       <div class="stat"><b>100%</b><span>Built for freelancers</span></div>
@@ -49,89 +61,36 @@
   <div class="container">
     <div class="split reveal">
       <div>
-        <span class="eyebrow">Our belief</span>
+        <span class="eyebrow"><span class="ms" aria-hidden="true">lightbulb</span>Our belief</span>
         <h2>Paperwork is part of the craft, not separate from it.</h2>
-        <p style="margin-top:20px;">The invoice is often the last thing a client sees from you before they pay. We believe it should look as considered as the work it's billing for — clear, calm, and unmistakably yours.</p>
-        <p style="margin-top:16px;">So we built Ledger Studio around three ideas: your brand should carry through automatically, your numbers should be trustworthy at a glance, and the whole process should take minutes, not an afternoon.</p>
+        <p>The invoice is often the last thing a client sees from you before they pay. We believe it should look as considered as the work it's billing for: clear, calm, and unmistakably yours.</p>
+        <p>So we built Ledger Studio around three ideas. Your brand should carry through automatically, your numbers should be trustworthy at a glance, and the whole process should take minutes, not an afternoon.</p>
       </div>
       <div class="timeline">
         <div class="timeline-item">
-          <span>STEP ONE</span>
-          <h3 style="margin:8px 0 6px;">Set up once</h3>
-          <p>Your logo, company details and bank information, saved for every invoice that follows.</p>
+          <span class="t-ic"><span class="ms" aria-hidden="true">tune</span></span>
+          <div>
+            <span class="t-label">STEP ONE</span>
+            <h3>Set up once</h3>
+            <p>Your logo, company details and bank information, saved for every invoice that follows.</p>
+          </div>
         </div>
         <div class="timeline-item">
-          <span>STEP TWO</span>
-          <h3 style="margin:8px 0 6px;">Bill with confidence</h3>
-          <p>Clean line items, automatic totals, and a preview that matches exactly what your client receives.</p>
+          <span class="t-ic"><span class="ms" aria-hidden="true">verified</span></span>
+          <div>
+            <span class="t-label">STEP TWO</span>
+            <h3>Bill with confidence</h3>
+            <p>Clean line items, automatic totals, and a preview that matches exactly what your client receives.</p>
+          </div>
         </div>
         <div class="timeline-item">
-          <span>STEP THREE</span>
-          <h3 style="margin:8px 0 6px;">Track what's coming in</h3>
-          <p>A dashboard that shows what you've earned and what's still outstanding, filtered your way.</p>
+          <span class="t-ic"><span class="ms" aria-hidden="true">insights</span></span>
+          <div>
+            <span class="t-label">STEP THREE</span>
+            <h3>Track what's coming in</h3>
+            <p>A dashboard that shows what you've earned and what's still outstanding, filtered your way.</p>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" style="background:var(--surface-2);">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">What we stand for</span>
-      <h2>The values behind every screen.</h2>
-    </div>
-    <div class="values-grid reveal-stagger">
-      <div class="value-card">
-        <span class="n">01</span>
-        <h3 style="margin:14px 0 8px;">Clarity over clutter</h3>
-        <p>Every field earns its place. If it doesn't help you get paid faster, it's not on the page.</p>
-      </div>
-      <div class="value-card">
-        <span class="n">02</span>
-        <h3 style="margin:14px 0 8px;">Your data stays yours</h3>
-        <p>Your company details, bank information and invoices are stored on your own device, not on a server you don't control.</p>
-      </div>
-      <div class="value-card">
-        <span class="n">03</span>
-        <h3 style="margin:14px 0 8px;">Built for real work</h3>
-        <p>Designed around how freelancers and small studios actually bill clients — not how a big accounting suite thinks you should.</p>
-      </div>
-      <div class="value-card">
-        <span class="n">04</span>
-        <h3 style="margin:14px 0 8px;">Quietly beautiful</h3>
-        <p>A tool you open every week should be pleasant to look at. We spent as much time on the motion and detail as the math.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">The studio</span>
-      <h2>A small team, obsessed with the details.</h2>
-    </div>
-    <div class="team-grid reveal-stagger">
-      <div class="team-card">
-        <div class="team-avatar">A</div>
-        <h4>Amara Chen</h4>
-        <span>Product & Design</span>
-      </div>
-      <div class="team-card">
-        <div class="team-avatar">D</div>
-        <h4>David Okafor</h4>
-        <span>Engineering</span>
-      </div>
-      <div class="team-card">
-        <div class="team-avatar">R</div>
-        <h4>Rhea Kapoor</h4>
-        <span>Customer Experience</span>
-      </div>
-      <div class="team-card">
-        <div class="team-avatar">M</div>
-        <h4>Marco Silva</h4>
-        <span>Brand & Content</span>
       </div>
     </div>
   </div>
@@ -139,42 +98,110 @@
 
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="cta-banner reveal">
-      <div class="cta-glow"></div>
-      <h2>Ready to see it for yourself?</h2>
-      <p>Set up your studio in minutes and send an invoice that actually looks like you.</p>
-      <a href="app.html" class="btn btn-ghost">Get started — it's free →</a>
+    <div class="section-head center reveal">
+      <span class="eyebrow"><span class="ms" aria-hidden="true">diamond</span>What we stand for</span>
+      <h2>The values behind every screen.</h2>
+    </div>
+    <div class="values-grid reveal-stagger">
+      <div class="value-card featured">
+        <span class="v-ic"><span class="ms" aria-hidden="true">filter_center_focus</span></span>
+        <h3>Clarity over clutter</h3>
+        <p>Every field earns its place. If it doesn't help you get paid faster, it's not on the page.</p>
+      </div>
+      <div class="value-card">
+        <span class="v-ic"><span class="ms" aria-hidden="true">lock</span></span>
+        <h3>Your data stays yours</h3>
+        <p>Your company details, bank information and invoices live in your own secure account. We never sell or share them.</p>
+      </div>
+      <div class="value-card">
+        <span class="v-ic"><span class="ms" aria-hidden="true">handyman</span></span>
+        <h3>Built for real work</h3>
+        <p>Designed around how freelancers and small studios actually bill clients, not how a big accounting suite thinks you should.</p>
+      </div>
+      <div class="value-card">
+        <span class="v-ic"><span class="ms" aria-hidden="true">auto_awesome</span></span>
+        <h3>Quietly beautiful</h3>
+        <p>A tool you open every week should be pleasant to look at. We spent as much time on the motion and detail as the maths.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<footer class="footer">
+<section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
-        <p>A calmer way to invoice. Built for freelancers, studios and small businesses who want their paperwork to look as good as their work.</p>
+    <div class="section-head center reveal">
+      <span class="eyebrow"><span class="ms" aria-hidden="true">groups</span>The studio</span>
+      <h2>A small team, obsessed with the details.</h2>
+    </div>
+    <div class="team-grid reveal-stagger">
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">A</div>
+        <h4>Amara Chen</h4>
+        <span>Product &amp; Design</span>
       </div>
-      <div class="footer-col">
-        <h4>Product</h4>
-        <a href="index.html#features">Features</a>
-        <a href="index.html#how">How it works</a>
-        <a href="app.html">Dashboard</a>
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">D</div>
+        <h4>David Okafor</h4>
+        <span>Engineering</span>
       </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <a href="about.html">About us</a>
-        <a href="app.html">Get started</a>
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">R</div>
+        <h4>Rhea Kapoor</h4>
+        <span>Customer Experience</span>
       </div>
-      <div class="footer-col">
-        <h4>Ledger Studio</h4>
-        <a href="app.html">Create invoice</a>
-        <a href="app.html">View invoices</a>
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">M</div>
+        <h4>Marco Silva</h4>
+        <span>Brand &amp; Content</span>
       </div>
     </div>
-    <div class="footer-bottom">
-      <span>© <span id="year"></span> Ledger Studio. All rights reserved.</span>
-      <span>Designed for freelancers, worldwide.</span>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;padding-bottom:0;">
+  <div class="container">
+    <div class="cta-banner reveal">
+      <div class="cta-glow" aria-hidden="true"></div>
+      <span class="tag-tilt t1" aria-hidden="true">Good</span>
+      <span class="tag-tilt t2" aria-hidden="true">Better</span>
+      <h2>Ready to see it for yourself?</h2>
+      <p>Set up your studio in minutes and send an invoice that actually looks like you.</p>
+      <a href="app.html" class="btn btn-light">Get started, it's free <span class="ms btn-ic" aria-hidden="true">arrow_forward</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-shell">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo"><span class="logo-mark" aria-hidden="true">L</span>Ledger Studio</a>
+          <p>A calmer way to invoice. Built for freelancers, studios and small businesses who want their paperwork to look as good as their work.</p>
+        </div>
+        <nav class="footer-col" aria-label="Product">
+          <h4>Product</h4>
+          <a href="index.html#features">Features</a>
+          <a href="index.html#how">How it works</a>
+          <a href="app.html">Dashboard</a>
+        </nav>
+        <nav class="footer-col" aria-label="Company">
+          <h4>Company</h4>
+          <a href="about.html">About us</a>
+          <a href="app.html">Get started</a>
+        </nav>
+        <nav class="footer-col" aria-label="Studio">
+          <h4>Ledger Studio</h4>
+          <a href="app.html">Create invoice</a>
+          <a href="app.html">View invoices</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> Ledger Studio. All rights reserved.</span>
+        <span>Designed for freelancers, worldwide.</span>
+      </div>
     </div>
   </div>
 </footer>

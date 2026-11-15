@@ -40,10 +40,11 @@
   }
   function setBusy(btn, busyText){
     if(!btn) return ()=>{};
-    const original = btn.textContent;
+    const original = btn.innerHTML;
     btn.textContent = busyText;
     btn.disabled = true;
-    return ()=>{ btn.textContent = original; btn.disabled = false; };
+    btn.setAttribute("aria-busy", "true");
+    return ()=>{ btn.innerHTML = original; btn.disabled = false; btn.removeAttribute("aria-busy"); };
   }
   function friendlyError(error){
     if(!error) return "Something went wrong. Please try again.";
@@ -429,7 +430,9 @@
       col.className = "bar-col";
       const bar = document.createElement("div");
       bar.className = "bar";
-      col.innerHTML = `<b>${fmtMoney(totals[idx]).replace(".00","")}</b>`;
+      const sym = fmtMoney(0).replace(/[\d.,\s-]/g, "");
+      const compact = new Intl.NumberFormat(undefined, {notation:"compact", maximumFractionDigits:1}).format(totals[idx]);
+      col.innerHTML = `<b title="${fmtMoney(totals[idx])}">${sym}${compact}</b>`;
       col.appendChild(bar);
       const label = document.createElement("span");
       label.textContent = m.label;
@@ -498,8 +501,8 @@
         <td class="mono">${fmtMoney(inv.total, inv.currency)}</td>
         <td>
           <div class="row-actions">
-            <button class="icon-btn" title="Edit" data-edit="${inv.id}"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-            <button class="icon-btn del" title="Delete" data-del="${inv.id}"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            <button class="icon-btn" title="Edit" aria-label="Edit invoice ${escapeHtml(inv.number)}" data-edit="${inv.id}"><span class="ms" aria-hidden="true">edit</span></button>
+            <button class="icon-btn del" title="Delete" aria-label="Delete invoice ${escapeHtml(inv.number)}" data-del="${inv.id}"><span class="ms" aria-hidden="true">delete</span></button>
           </div>
         </td>`;
       body.appendChild(tr);
@@ -561,11 +564,11 @@
     const row = document.createElement("div");
     row.className = "line-item";
     row.innerHTML = `
-      <input type="text" class="li-desc" placeholder="Description of work" value="${escapeHtml(item?.desc || "")}">
-      <input type="number" class="li-qty" placeholder="Qty" min="0" value="${item?.qty ?? 1}">
-      <input type="number" class="li-rate" placeholder="Rate" min="0" value="${item?.rate ?? 0}">
+      <input type="text" class="li-desc" placeholder="Description of work" aria-label="Description" value="${escapeHtml(item?.desc || "")}">
+      <input type="number" class="li-qty" placeholder="Qty" aria-label="Quantity" min="0" value="${item?.qty ?? 1}">
+      <input type="number" class="li-rate" placeholder="Rate" aria-label="Rate" min="0" value="${item?.rate ?? 0}">
       <div class="amt">₦0.00</div>
-      <button class="icon-btn del li-remove" title="Remove"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+      <button class="icon-btn del li-remove" title="Remove" aria-label="Remove line item"><span class="ms" aria-hidden="true">close</span></button>`;
     row.querySelectorAll("input").forEach(inp=> inp.addEventListener("input", recalc));
     row.querySelector(".li-remove").addEventListener("click", ()=>{ row.remove(); recalc(); });
     return row;
@@ -628,7 +631,7 @@
     const status = document.getElementById("invoiceStatus").value;
     const badge = document.getElementById("prevStatusBadge");
     badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-    const colors = {paid:["#e6f4e6","#046C04"], unpaid:["#fdf3d9","#9a6b00"], draft:["#eee","#777"]};
+    const colors = {paid:["#E2F5EB","#0B7A44"], unpaid:["#FFF1D9","#8F5600"], draft:["#EEF0F6","#45486A"]};
     badge.style.background = colors[status][0];
     badge.style.color = colors[status][1];
 
@@ -884,7 +887,7 @@
   }
   function updateLogoPreview(){
     const preview = document.getElementById("logoPreview");
-    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : '<svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : '<span class="ms" aria-hidden="true">add_photo_alternate</span>';
   }
 
   const logoUpload = document.getElementById("logoUpload");

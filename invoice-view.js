@@ -35,7 +35,7 @@
   function render(data){
     const container = document.getElementById("invoiceContainer");
     const symbol = data.currency || "₦";
-    const colors = {paid:["#e6f4e6","#046C04"], unpaid:["#fdf3d9","#9a6b00"], draft:["#eee","#777"]};
+    const colors = {paid:["#E2F5EB","#0B7A44"], unpaid:["#FFF1D9","#8F5600"], draft:["#EEF0F6","#45486A"]};
     const statusColor = colors[data.status] || colors.draft;
 
     const itemsHtml = (data.items || []).map(item => `
