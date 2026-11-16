@@ -560,39 +560,63 @@
   /* =========================================================
      EDITOR — line items, calculations, preview
   ========================================================= */
-  const ITEM_IMG_MAX = 256;           // px, longest side
-  const ITEM_IMG_QUALITY = 0.8;       // JPEG quality
-  const SAFE_IMG = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
-  const safeImg = (src)=> (typeof src === "string" && SAFE_IMG.test(src)) ? src : "";
+  const IMAGE_BUCKET = "invoice-images";
+  // Accept our own compressed data URLs (older invoices / offline fallback)
+  // or public files from this app's Supabase Storage bucket. Nothing else.
+  const SAFE_DATA_IMG = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+  const SAFE_STORAGE_IMG = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/invoice-images\/[A-Za-z0-9/_.-]+$/;
+  const safeImg = (src)=> (typeof src === "string" && (SAFE_DATA_IMG.test(src) || SAFE_STORAGE_IMG.test(src))) ? src : "";
 
-  // Shrink a photo in the browser so invoices stay light to save, share and export.
-  function compressImage(file){
+  // Shrink an image in the browser before it is uploaded or saved.
+  // Returns both a data URL (instant preview / fallback) and a Blob (for upload).
+  function compressImage(file, {max = 256, type = "image/jpeg", quality = 0.8} = {}){
     return new Promise((resolve, reject)=>{
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = ()=>{
-        const scale = Math.min(1, ITEM_IMG_MAX / Math.max(img.width, img.height));
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
         const w = Math.max(1, Math.round(img.width * scale));
         const h = Math.max(1, Math.round(img.height * scale));
         const canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffffff";            // transparent PNGs get a clean white backing
-        ctx.fillRect(0, 0, w, h);
+        if(type === "image/jpeg"){ ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h); } // white behind transparent PNGs
         ctx.drawImage(img, 0, 0, w, h);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", ITEM_IMG_QUALITY));
+        const dataUrl = canvas.toDataURL(type, quality);
+        canvas.toBlob(blob => blob ? resolve({dataUrl, blob}) : reject(new Error("Encode failed")), type, quality);
       };
       img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error("Unreadable image")); };
       img.src = url;
     });
   }
 
+  // Uploads in flight; save and share wait for these so they never capture a half-done photo.
+  const pendingUploads = new Set();
+  function trackUpload(promise){
+    pendingUploads.add(promise);
+    promise.finally(()=> pendingUploads.delete(promise));
+    return promise;
+  }
+  async function waitForUploads(){
+    while(pendingUploads.size){ await Promise.allSettled([...pendingUploads]); }
+  }
+
+  // Upload to Supabase Storage under <user id>/<folder>/. Returns the public URL, or "" on failure.
+  async function uploadImage(blob, folder){
+    if(!currentUser || !supa.storage) return "";
+    const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+    const name = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10) + "." + ext;
+    const { data, error } = await supa.storage.upload(IMAGE_BUCKET, currentUser.id + "/" + folder + "/" + name, blob);
+    if(error){ console.error("Image upload failed:", error.message); return ""; }
+    return data.publicUrl;
+  }
+
   function paintItemPhoto(row){
     const slot = row.querySelector(".li-photo");
     const clear = row.querySelector(".li-photo-clear");
     if(row._image){
-      slot.innerHTML = `<img src="${row._image}" alt="">`;
+      slot.innerHTML = `<img src="${row._image}" alt="" crossorigin="anonymous">`;
       slot.classList.add("has-img");
       slot.setAttribute("aria-label", "Change photo for this item");
       clear.hidden = false;
@@ -608,12 +632,30 @@
     if(!file) return;
     if(!file.type.startsWith("image/")){ toast("Please choose an image file", "error"); return; }
     if(file.size > 10 * 1024 * 1024){ toast("Photo should be under 10MB", "error"); return; }
+    let compressed;
     try{
-      row._image = await compressImage(file);
-      paintItemPhoto(row);
-      recalc();
+      compressed = await compressImage(file, {max:256, type:"image/jpeg", quality:0.8});
     }catch(err){
       toast("Couldn't read that image, try another", "error");
+      return;
+    }
+    // Show it straight away, then swap in the short Storage URL once uploaded.
+    const uploadId = Symbol("upload");
+    row._uploadId = uploadId;
+    row._image = compressed.dataUrl;
+    row.classList.add("uploading");
+    paintItemPhoto(row);
+    recalc();
+
+    const url = await trackUpload(uploadImage(compressed.blob, "items"));
+    if(row._uploadId !== uploadId) return;          // replaced or removed meanwhile
+    row.classList.remove("uploading");
+    if(url){
+      row._image = url;
+      paintItemPhoto(row);
+      recalc();
+    } else {
+      toast("Photo kept inside the invoice — upload didn't go through", "error");
     }
   }
 
@@ -639,7 +681,7 @@
     const fileInput = row.querySelector(".li-photo-input");
     slot.addEventListener("click", ()=> fileInput.click());
     fileInput.addEventListener("change", ()=>{ setItemPhoto(row, fileInput.files[0]); fileInput.value = ""; });
-    row.querySelector(".li-photo-clear").addEventListener("click", ()=>{ row._image = ""; paintItemPhoto(row); recalc(); slot.focus(); });
+    row.querySelector(".li-photo-clear").addEventListener("click", ()=>{ row._uploadId = null; row.classList.remove("uploading"); row._image = ""; paintItemPhoto(row); recalc(); slot.focus(); });
     ["dragenter","dragover"].forEach(evt=> slot.addEventListener(evt, e=>{ e.preventDefault(); slot.classList.add("dragover"); }));
     ["dragleave","drop"].forEach(evt=> slot.addEventListener(evt, e=>{ e.preventDefault(); slot.classList.remove("dragover"); }));
     slot.addEventListener("drop", e=> setItemPhoto(row, e.dataTransfer.files[0]));
@@ -721,7 +763,7 @@
       const tr = document.createElement("tr");
       const img = safeImg(item.image);
       const descCell = img
-        ? `<div class="item-cell"><img class="item-img" src="${img}" alt=""><span>${escapeHtml(item.desc || "Untitled item")}</span></div>`
+        ? `<div class="item-cell"><img class="item-img" src="${img}" alt="" crossorigin="anonymous"><span>${escapeHtml(item.desc || "Untitled item")}</span></div>`
         : escapeHtml(item.desc || "Untitled item");
       tr.innerHTML = `<td>${descCell}</td><td>${item.qty}</td><td>${fmtMoney(item.rate, symbol)}</td><td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>`;
       tbody.appendChild(tr);
@@ -813,6 +855,11 @@
   }
 
   document.getElementById("saveInvoiceBtn").addEventListener("click", async ()=>{
+    if(pendingUploads.size){
+      const doneWaiting = setBusy(document.getElementById("saveInvoiceBtn"), "Uploading photos…");
+      await waitForUploads();
+      doneWaiting();
+    }
     const calc = recalc();
     const clientName = document.getElementById("clientName").value.trim();
     if(!clientName){
@@ -908,7 +955,12 @@
 
   /* ---------------- Share link (editor) ---------------- */
   const shareModal = document.getElementById("shareModal");
-  document.getElementById("shareBtn").addEventListener("click", ()=>{
+  document.getElementById("shareBtn").addEventListener("click", async ()=>{
+    if(pendingUploads.size){
+      const doneWaiting = setBusy(document.getElementById("shareBtn"), "Uploading photos…");
+      await waitForUploads();
+      doneWaiting();
+    }
     const calc = recalc();
     const clientName = document.getElementById("clientName").value.trim();
     if(!clientName){ toast("Add a client name first", "error"); return; }
@@ -996,17 +1048,28 @@
     const file = e.dataTransfer.files[0];
     if(file) handleLogoFile(file);
   });
-  function handleLogoFile(file){
+  async function handleLogoFile(file){
     if(!file) return;
     if(!file.type.startsWith("image/")){ toast("Please upload an image file", "error"); return; }
-    if(file.size > 2 * 1024 * 1024){ toast("Logo should be under 2MB", "error"); return; }
-    const reader = new FileReader();
-    reader.onload = (e)=>{
-      company.logo = e.target.result;
+    if(file.size > 10 * 1024 * 1024){ toast("Logo should be under 10MB", "error"); return; }
+    let compressed;
+    try{
+      // PNG keeps transparent logos transparent
+      compressed = await compressImage(file, {max:400, type:"image/png"});
+    }catch(err){
+      toast("Couldn't read that image, try another", "error");
+      return;
+    }
+    company.logo = compressed.dataUrl;
+    updateLogoPreview();
+    const url = await trackUpload(uploadImage(compressed.blob, "logo"));
+    if(url){
+      company.logo = url;
       updateLogoPreview();
       toast("Logo added — remember to save");
-    };
-    reader.readAsDataURL(file);
+    } else {
+      toast("Logo added (stored inside your details) — remember to save");
+    }
   }
   document.getElementById("removeLogoBtn").addEventListener("click", ()=>{
     company.logo = "";
@@ -1015,6 +1078,7 @@
 
   document.getElementById("saveCompanyBtn").addEventListener("click", async ()=>{
     const done = setBusy(document.getElementById("saveCompanyBtn"), "Saving…");
+    await waitForUploads();
     const next = {
       user_id: currentUser.id,
       name: document.getElementById("companyName").value.trim(),

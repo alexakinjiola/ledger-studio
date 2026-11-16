@@ -910,6 +910,12 @@ input[type="date"]{cursor:pointer;}
   background:#11122E;color:#fff;border:2px solid var(--surface-2);box-shadow:var(--shadow-sm);
 }
 .li-photo-clear[hidden]{display:none;}
+.line-item.uploading .li-photo{position:relative;}
+.line-item.uploading .li-photo::after{
+  content:"";position:absolute;inset:0;margin:auto;width:26px;height:26px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.7);border-top-color:#5B4AF7;animation:spin .8s linear infinite;
+  box-shadow:0 0 0 999px rgba(17,18,46,.35);
+}
 .li-photo-clear .ms{font-size:15px;}
 .li-photo-clear:hover{background:var(--danger);}
 .line-item .amt{font-size:15px;font-weight:700;text-align:right;padding-right:6px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
