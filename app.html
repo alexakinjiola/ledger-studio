@@ -4,77 +4,113 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ledger Studio — Dashboard</title>
+<meta name="theme-color" content="#11122E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="app-body">
 
 <!-- AUTH SCREEN -->
 <div class="auth-screen" id="authScreen">
-  <div class="auth-card">
-    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
-    <p class="auth-sub">Your studio, your invoices, your data.</p>
+  <div class="auth-layout">
+    <aside class="auth-aside" aria-hidden="true">
+      <a href="index.html" class="logo" tabindex="-1"><span class="logo-mark">L</span>Ledger Studio</a>
+      <div>
+        <h2>Send invoices that look like <em>you mean business.</em></h2>
+        <p>Your brand, your bank details and every invoice you've sent, saved securely and ready on any device.</p>
+      </div>
+      <div class="mini">
+        <div class="float-card fc-paid">
+          <div class="fc-ic"><span class="ms fill">check_circle</span></div>
+          <div><b>Payment received</b><small>Bright &amp; Co. · just now</small></div>
+        </div>
+        <div class="invoice-mock">
+          <div class="invoice-mock-head">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <div class="im-logo"></div>
+              <div><h4>Bright &amp; Co.</h4><small>#LS-0148</small></div>
+            </div>
+            <span class="im-badge">Due Jul 24</span>
+          </div>
+          <div class="im-row"><span>Brand identity design</span><span>₦1,800,000.00</span></div>
+          <div class="im-row"><span>Website, 4 pages</span><span>₦2,400,000.00</span></div>
+          <div class="im-total"><small>Total due</small><b class="im-total-num">₦4,850,000.00</b></div>
+        </div>
+        <span class="tag-tilt t1">Paid</span>
+      </div>
+    </aside>
 
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="signin">Sign in</button>
-      <button class="auth-tab" data-tab="signup">Create account</button>
+    <div class="auth-card">
+      <a href="index.html" class="logo"><span class="logo-mark" aria-hidden="true">L</span>Ledger Studio</a>
+      <h1 class="auth-title">Welcome to your studio</h1>
+      <p class="auth-sub">Your studio, your invoices, your data.</p>
+
+      <div class="auth-tabs" role="tablist" aria-label="Account">
+        <button class="auth-tab active" data-tab="signin" role="tab">Sign in</button>
+        <button class="auth-tab" data-tab="signup" role="tab">Create account</button>
+      </div>
+
+      <div class="auth-error" id="authError" role="alert"></div>
+
+      <form class="auth-form active" id="signinForm">
+        <div class="field"><label for="signinEmail">Email</label><input type="email" id="signinEmail" required placeholder="you@studio.com" autocomplete="email"></div>
+        <div class="field">
+          <label for="signinPassword">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="signinPassword" required placeholder="Your password" autocomplete="current-password">
+            <button type="button" class="pw-toggle" data-target="signinPassword" aria-label="Show password"><span class="ms" aria-hidden="true">visibility</span></button>
+          </div>
+          <button type="button" class="link-btn" id="forgotPasswordBtn">Forgot password?</button>
+        </div>
+        <div class="auth-error" id="resendBox" style="display:none;">
+          Didn't get the email? <button type="button" id="resendConfirmationBtn">Resend confirmation</button>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="signinSubmitBtn">Sign in</button>
+      </form>
+
+      <form class="auth-form" id="signupForm">
+        <div class="field"><label for="signupName">Full name</label><input type="text" id="signupName" required placeholder="Amara Chen" autocomplete="name"></div>
+        <div class="field"><label for="signupEmail">Email</label><input type="email" id="signupEmail" required placeholder="you@studio.com" autocomplete="email"></div>
+        <div class="field">
+          <label for="signupPassword">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="signupPassword" required placeholder="At least 6 characters" autocomplete="new-password">
+            <button type="button" class="pw-toggle" data-target="signupPassword" aria-label="Show password"><span class="ms" aria-hidden="true">visibility</span></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="signupSubmitBtn">Create account</button>
+      </form>
+
+      <div class="auth-foot" id="authFootText">New here? <button id="authFootBtn">Create an account</button></div>
+      <p class="demo-note"><span class="ms" aria-hidden="true">verified_user</span><span>Your account and data are stored securely in your own Supabase database, accessible from any device you sign in on.</span></p>
     </div>
-
-    <div class="auth-error" id="authError"></div>
-
-    <form class="auth-form active" id="signinForm">
-      <div class="field"><label>Email</label><input type="email" id="signinEmail" required placeholder="you@studio.com"></div>
-      <div class="field">
-        <label>Password</label>
-        <div class="password-wrap">
-          <input type="password" id="signinPassword" required placeholder="••••••••">
-          <button type="button" class="pw-toggle" data-target="signinPassword" aria-label="Show password"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-        <button type="button" class="link-btn" id="forgotPasswordBtn">Forgot password?</button>
-      </div>
-      <div class="auth-error" id="resendBox" style="display:none;">
-        Didn't get the email? <button type="button" id="resendConfirmationBtn">Resend confirmation</button>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="signinSubmitBtn">Sign in</button>
-    </form>
-
-    <form class="auth-form" id="signupForm">
-      <div class="field"><label>Full name</label><input type="text" id="signupName" required placeholder="Amara Chen"></div>
-      <div class="field"><label>Email</label><input type="email" id="signupEmail" required placeholder="you@studio.com"></div>
-      <div class="field">
-        <label>Password</label>
-        <div class="password-wrap">
-          <input type="password" id="signupPassword" required placeholder="At least 6 characters">
-          <button type="button" class="pw-toggle" data-target="signupPassword" aria-label="Show password"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="signupSubmitBtn">Create account</button>
-    </form>
-
-    <div class="auth-foot" id="authFootText">New here? <button id="authFootBtn">Create an account</button></div>
-    <p class="demo-note">Your account and data are stored securely in your own Supabase database — accessible from any device you sign in on.</p>
   </div>
 </div>
 
 <!-- LOADING OVERLAY -->
 <div class="auth-screen" id="appLoader" style="display:none;">
-  <div class="auth-card" style="text-align:center;">
+  <div class="auth-card" style="text-align:center;" role="status">
     <div class="spinner" aria-hidden="true"></div>
-    <p class="auth-sub" style="margin-top:18px;">Loading your studio…</p>
+    <p class="auth-sub" style="margin:18px 0 0;">Loading your studio…</p>
   </div>
 </div>
 
 <!-- PASSWORD RECOVERY SCREEN -->
 <div class="auth-screen" id="recoveryScreen" style="display:none;">
   <div class="auth-card">
-    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+    <a href="index.html" class="logo"><span class="logo-mark" aria-hidden="true">L</span>Ledger Studio</a>
+    <h1 class="auth-title">Set a new password</h1>
     <p class="auth-sub">Choose a new password for your account.</p>
-    <div class="auth-error" id="recoveryError"></div>
+    <div class="auth-error" id="recoveryError" role="alert"></div>
     <form id="recoveryForm" style="display:flex;flex-direction:column;gap:16px;">
       <div class="field">
-        <label>New password</label>
+        <label for="recoveryPassword">New password</label>
         <div class="password-wrap">
-          <input type="password" id="recoveryPassword" required placeholder="At least 6 characters">
-          <button type="button" class="pw-toggle" data-target="recoveryPassword" aria-label="Show password"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <input type="password" id="recoveryPassword" required placeholder="At least 6 characters" autocomplete="new-password">
+          <button type="button" class="pw-toggle" data-target="recoveryPassword" aria-label="Show password"><span class="ms" aria-hidden="true">visibility</span></button>
         </div>
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="recoverySubmitBtn">Set new password</button>
@@ -83,20 +119,20 @@
 </div>
 
 <div class="app-mobile-bar">
-  <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+  <a href="index.html" class="logo"><span class="logo-mark" aria-hidden="true">L</span>Ledger Studio</a>
   <div style="display:flex;gap:10px;align-items:center;">
-    <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode"><span class="knob"></span></button>
-    <button class="btn-icon" id="sidebarBtn" aria-label="Open menu"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <button class="theme-switch" id="themeSwitch" aria-label="Dark mode" aria-pressed="false"><span class="knob" aria-hidden="true"></span></button>
+    <button class="btn-icon" id="sidebarBtn" aria-label="Open menu" aria-controls="sidebar"><span class="ms" aria-hidden="true">menu</span></button>
   </div>
 </div>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="app-shell">
-  <aside class="sidebar" id="sidebar">
-    <a href="index.html" class="logo"><span class="logo-mark">L</span>Ledger Studio</a>
+  <aside class="sidebar" id="sidebar" aria-label="App navigation">
+    <a href="index.html" class="logo"><span class="logo-mark" aria-hidden="true">L</span>Ledger Studio</a>
 
-    <div class="user-card" data-view="profile" id="sidebarUserCard">
+    <div class="user-card" data-view="profile" id="sidebarUserCard" role="button" tabindex="0" aria-label="Open profile">
       <div class="avatar" id="sidebarAvatar">U</div>
       <div class="who">
         <b id="sidebarUserName">Your studio</b>
@@ -105,124 +141,140 @@
     </div>
 
     <span class="sidebar-section-label">Workspace</span>
-    <a href="#" class="side-link active" data-view="dashboard"><span class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span> Dashboard</a>
-    <a href="#" class="side-link" data-view="invoices"><span class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></span> Invoices</a>
-    <a href="#" class="side-link" data-view="editor" id="newInvoiceLink"><span class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span> Create Invoice</a>
+    <a href="#" class="side-link active" data-view="dashboard"><span class="ic"><span class="ms" aria-hidden="true">space_dashboard</span></span>Dashboard</a>
+    <a href="#" class="side-link" data-view="invoices"><span class="ic"><span class="ms" aria-hidden="true">receipt_long</span></span>Invoices</a>
+    <a href="#" class="side-link" data-view="editor" id="newInvoiceLink"><span class="ic"><span class="ms" aria-hidden="true">edit_square</span></span>Create invoice</a>
 
     <span class="sidebar-section-label">Settings</span>
-    <a href="#" class="side-link" data-view="company"><span class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span> Company Details</a>
-    <a href="#" class="side-link" data-view="bank"><span class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-9h6v9"/><path d="M9 9h.01M15 9h.01"/></svg></span> Bank Details</a>
-    <a href="#" class="side-link" data-view="profile"><span class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg></span> Profile</a>
+    <a href="#" class="side-link" data-view="company"><span class="ic"><span class="ms" aria-hidden="true">storefront</span></span>Company details</a>
+    <a href="#" class="side-link" data-view="bank"><span class="ic"><span class="ms" aria-hidden="true">account_balance</span></span>Bank details</a>
+    <a href="#" class="side-link" data-view="profile"><span class="ic"><span class="ms" aria-hidden="true">person</span></span>Profile</a>
+
+    <div class="sidebar-promo">
+      <span class="ms" aria-hidden="true">bolt</span>
+      <b>Bill a client now</b>
+      <p>Your brand and bank details are filled in for you.</p>
+      <a href="#" data-view="editor">New invoice <span class="ms sm" aria-hidden="true">arrow_forward</span></a>
+    </div>
 
     <div class="sidebar-foot">
-      <button id="logoutBtn" style="font-size:13px;color:var(--ink-faint);font-weight:600;display:flex;align-items:center;gap:6px;">
-        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        Log out
-      </button>
-      <button class="theme-switch" id="themeSwitchDesktop" aria-label="Toggle dark mode"><span class="knob"></span></button>
+      <button id="logoutBtn"><span class="ms sm" aria-hidden="true">logout</span>Log out</button>
+      <button class="theme-switch" id="themeSwitchDesktop" aria-label="Dark mode" aria-pressed="false"><span class="knob" aria-hidden="true"></span></button>
     </div>
   </aside>
 
-  <main class="app-main">
+  <main class="app-main" id="main">
 
     <!-- DASHBOARD -->
-    <section class="view active" id="view-dashboard">
+    <section class="view active" id="view-dashboard" aria-labelledby="dashTitle">
       <div class="app-topbar">
         <div>
-          <h1>Dashboard</h1>
+          <h1 id="dashTitle">Dashboard</h1>
           <p>Here's how your billing is looking.</p>
         </div>
-        <a href="#" class="btn btn-primary btn-sm" data-view="editor">+ New Invoice</a>
+        <a href="#" class="btn btn-primary btn-sm" data-view="editor"><span class="ms" aria-hidden="true">add</span>New invoice</a>
       </div>
 
-      <div class="filter-row" id="durationFilters">
-        <button class="chip" data-range="7">Last 7 days</button>
-        <button class="chip" data-range="30">Last 30 days</button>
-        <button class="chip" data-range="90">Last 90 days</button>
-        <button class="chip" data-range="365">This year</button>
-        <button class="chip active" data-range="all">All time</button>
+      <div class="filter-row">
+        <span class="filter-label"><span class="ms" aria-hidden="true">calendar_month</span>Period</span>
+        <div class="segmented" id="durationFilters" role="group" aria-label="Date range">
+          <button class="chip" data-range="7">Last 7 days</button>
+          <button class="chip" data-range="30">Last 30 days</button>
+          <button class="chip" data-range="90">Last 90 days</button>
+          <button class="chip" data-range="365">This year</button>
+          <button class="chip active" data-range="all">All time</button>
+        </div>
       </div>
 
       <div class="stat-cards">
-        <div class="stat-card">
-          <div class="lbl">Total revenue <span class="glyph"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span></div>
+        <div class="stat-card featured">
+          <div class="lbl">Total revenue <span class="glyph"><span class="ms" aria-hidden="true">payments</span></span></div>
           <div class="val" id="statRevenue">$0.00</div>
-          <div class="delta" id="statRevenueDelta">from paid invoices</div>
+          <div class="delta up" id="statRevenueDelta">from paid invoices</div>
         </div>
         <div class="stat-card">
-          <div class="lbl">Outstanding <span class="glyph"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span></div>
+          <div class="lbl">Outstanding <span class="glyph"><span class="ms" aria-hidden="true">pending_actions</span></span></div>
           <div class="val" id="statOutstanding">$0.00</div>
           <div class="delta down" id="statOutstandingDelta">awaiting payment</div>
         </div>
         <div class="stat-card">
-          <div class="lbl">Invoices <span class="glyph"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></span></div>
+          <div class="lbl">Invoices <span class="glyph"><span class="ms" aria-hidden="true">receipt_long</span></span></div>
           <div class="val" id="statCount">0</div>
           <div class="delta" id="statCountDelta">in selected range</div>
         </div>
         <div class="stat-card">
-          <div class="lbl">Avg. invoice <span class="glyph"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></span></div>
+          <div class="lbl">Avg. invoice <span class="glyph"><span class="ms" aria-hidden="true">query_stats</span></span></div>
           <div class="val" id="statAvg">$0.00</div>
           <div class="delta">per invoice</div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-head">
-          <h3>Revenue — last 6 months</h3>
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="title-ic">
+              <span class="ms" aria-hidden="true">bar_chart</span>
+              <div><h3>Revenue</h3><div class="sub">Paid invoices, last 6 months</div></div>
+            </div>
+          </div>
+          <div class="bar-chart" id="barChart"></div>
         </div>
-        <div class="bar-chart" id="barChart"></div>
-      </div>
 
-      <div class="panel">
-        <div class="panel-head">
-          <h3>Recent invoices</h3>
-          <a href="#" class="btn btn-ghost btn-sm" data-view="invoices">View all</a>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Invoice</th><th>Client</th><th>Date</th><th>Status</th><th>Amount</th></tr></thead>
-            <tbody id="recentInvoicesBody"></tbody>
-          </table>
-        </div>
-        <div class="empty-state" id="dashEmptyState" style="display:none;">
-          <div class="ic"><svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></div>
-          <h4>No invoices yet</h4>
-          <p>Create your first invoice to see it show up here.</p>
+        <div class="panel panel-dark">
+          <div class="panel-head">
+            <div class="title-ic">
+              <span class="ms" aria-hidden="true">history</span>
+              <div><h3>Recent invoices</h3><div class="sub">Your latest five</div></div>
+            </div>
+            <a href="#" class="btn btn-ghost btn-sm" data-view="invoices">View all <span class="ms sm" aria-hidden="true">arrow_forward</span></a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Invoice</th><th scope="col">Client</th><th scope="col">Date</th><th scope="col">Status</th><th scope="col">Amount</th></tr></thead>
+              <tbody id="recentInvoicesBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="dashEmptyState" style="display:none;">
+            <div class="ic"><span class="ms" aria-hidden="true">receipt_long</span></div>
+            <h4>No invoices yet</h4>
+            <p>Create your first invoice to see it show up here.</p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- INVOICES LIST -->
-    <section class="view" id="view-invoices">
+    <section class="view" id="view-invoices" aria-labelledby="invoicesTitle">
       <div class="app-topbar">
         <div>
-          <h1>Invoices</h1>
-          <p>All the invoices you've created.</p>
+          <h1 id="invoicesTitle">Invoices</h1>
+          <p>Manage and track all your invoices in one place.</p>
         </div>
-        <a href="#" class="btn btn-primary btn-sm" data-view="editor">+ New Invoice</a>
+        <a href="#" class="btn btn-primary btn-sm" data-view="editor"><span class="ms" aria-hidden="true">add</span>New invoice</a>
       </div>
 
       <div class="filter-row" style="justify-content:space-between;">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="chip active" data-status="all">All</button>
+        <div class="segmented" role="group" aria-label="Filter by status">
+          <button class="chip active" data-status="all">All invoices</button>
           <button class="chip" data-status="paid">Paid</button>
           <button class="chip" data-status="unpaid">Unpaid</button>
           <button class="chip" data-status="draft">Draft</button>
         </div>
         <div class="search-box">
-          <input type="text" id="invoiceSearch" placeholder="Search by client or invoice #">
+          <span class="ms" aria-hidden="true">search</span>
+          <input type="search" id="invoiceSearch" placeholder="Search by client or invoice #" aria-label="Search invoices">
         </div>
       </div>
 
-      <div class="panel" style="padding:0;">
+      <div class="panel panel-flush">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Invoice</th><th>Client</th><th>Issued</th><th>Due</th><th>Status</th><th>Amount</th><th></th></tr></thead>
+            <thead><tr><th scope="col">Invoice</th><th scope="col">Client</th><th scope="col">Issued</th><th scope="col">Due</th><th scope="col">Status</th><th scope="col">Amount</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
             <tbody id="allInvoicesBody"></tbody>
           </table>
         </div>
         <div class="empty-state" id="invoicesEmptyState" style="display:none;">
-          <div class="ic"><svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+          <div class="ic"><span class="ms" aria-hidden="true">search_off</span></div>
           <h4>No invoices match</h4>
           <p>Try a different filter, or create a new invoice.</p>
         </div>
@@ -230,17 +282,17 @@
     </section>
 
     <!-- EDITOR -->
-    <section class="view" id="view-editor">
+    <section class="view" id="view-editor" aria-labelledby="editorTitle">
       <div class="app-topbar">
         <div>
           <h1 id="editorTitle">Create Invoice</h1>
-          <p>Fill in the details below — the preview updates as you type.</p>
+          <p>Fill in the details below and add a photo to any item. The preview updates as you type.</p>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" id="printBtn"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Print</button>
-          <button class="btn btn-ghost btn-sm" id="downloadPdfBtn"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg> Download PDF</button>
-          <button class="btn btn-ghost btn-sm" id="shareBtn"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9"/></svg> Share link</button>
-          <button class="btn btn-primary btn-sm" id="saveInvoiceBtn">Save Invoice</button>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" id="printBtn"><span class="ms" aria-hidden="true">print</span>Print</button>
+          <button class="btn btn-ghost btn-sm" id="downloadPdfBtn"><span class="ms" aria-hidden="true">download</span>Download PDF</button>
+          <button class="btn btn-ghost btn-sm" id="shareBtn"><span class="ms" aria-hidden="true">link</span>Share link</button>
+          <button class="btn btn-primary btn-sm" id="saveInvoiceBtn"><span class="ms" aria-hidden="true">check</span>Save invoice</button>
         </div>
       </div>
 
@@ -249,28 +301,28 @@
       <div class="editor-grid">
         <div>
           <div class="panel">
-            <div class="panel-head"><h3>Client details</h3></div>
-            <div class="form-grid">
-              <div class="field"><label>Client name</label><input type="text" id="clientName" placeholder="e.g. Bright & Co."></div>
-              <div class="field"><label>Client email</label><input type="email" id="clientEmail" placeholder="client@email.com"></div>
-              <div class="field full"><label>Client address</label><textarea id="clientAddress" placeholder="123 Market Street, Lagos, Nigeria"></textarea></div>
+            <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">person</span><h3>Client details</h3></div></div>
+            <div class="form-grid" style="margin-bottom:0;">
+              <div class="field"><label for="clientName">Client name</label><input type="text" id="clientName" placeholder="e.g. Bright &amp; Co."></div>
+              <div class="field"><label for="clientEmail">Client email</label><input type="email" id="clientEmail" placeholder="client@email.com"></div>
+              <div class="field full"><label for="clientAddress">Client address</label><textarea id="clientAddress" placeholder="123 Market Street, Lagos, Nigeria"></textarea></div>
             </div>
           </div>
 
           <div class="panel">
-            <div class="panel-head"><h3>Invoice details</h3></div>
-            <div class="form-grid">
-              <div class="field"><label>Invoice number</label><input type="text" id="invoiceNumber" placeholder="LS-0001"></div>
-              <div class="field"><label>Status</label>
+            <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">description</span><h3>Invoice details</h3></div></div>
+            <div class="form-grid" style="margin-bottom:0;">
+              <div class="field"><label for="invoiceNumber">Invoice number</label><input type="text" id="invoiceNumber" placeholder="LS-0001"></div>
+              <div class="field"><label for="invoiceStatus">Status</label>
                 <select id="invoiceStatus">
                   <option value="draft">Draft</option>
                   <option value="unpaid">Unpaid</option>
                   <option value="paid">Paid</option>
                 </select>
               </div>
-              <div class="field"><label>Issue date</label><input type="date" id="issueDate"></div>
-              <div class="field"><label>Due date</label><input type="date" id="dueDate"></div>
-              <div class="field"><label>Currency</label>
+              <div class="field"><label for="issueDate">Issue date</label><input type="date" id="issueDate"></div>
+              <div class="field"><label for="dueDate">Due date</label><input type="date" id="dueDate"></div>
+              <div class="field"><label for="currency">Currency</label>
                 <select id="currency">
                   <option value="₦" selected>NGN (₦)</option>
                   <option value="$">USD ($)</option>
@@ -280,182 +332,206 @@
                   <option value="C$">CAD (C$)</option>
                 </select>
               </div>
-              <div class="field"><label>Tax (%)</label><input type="number" id="taxPercent" value="0" min="0"></div>
-              <div class="field"><label>Discount (%)</label><input type="number" id="discountPercent" value="0" min="0"></div>
+              <div class="field"><label for="taxPercent">Tax (%)</label><input type="number" id="taxPercent" value="0" min="0"></div>
+              <div class="field"><label for="discountPercent">Discount (%)</label><input type="number" id="discountPercent" value="0" min="0"></div>
             </div>
           </div>
 
           <div class="panel">
-            <div class="panel-head"><h3>Line items</h3></div>
+            <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">format_list_bulleted</span><h3>Line items</h3></div></div>
+            <div class="line-head" aria-hidden="true"><span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span><span></span></div>
             <div class="line-items" id="lineItems"></div>
-            <button class="add-line-btn" id="addLineBtn">+ Add line item</button>
-            <div class="totals-box">
+            <button class="add-line-btn" id="addLineBtn"><span class="ms" aria-hidden="true">add_circle</span>Add line item</button>
+            <div class="totals-box" aria-live="polite">
               <div class="row"><span>Subtotal</span><b id="calcSubtotal">$0.00</b></div>
               <div class="row"><span>Discount</span><b id="calcDiscount">-$0.00</b></div>
               <div class="row"><span>Tax</span><b id="calcTax">+$0.00</b></div>
-              <div class="row grand"><span>Total due</span><b id="calcTotal">$0.00</b></div>
+              <div class="row grand"><span>Balance due</span><b id="calcTotal">$0.00</b></div>
             </div>
           </div>
 
           <div class="panel">
-            <div class="panel-head"><h3>Notes</h3></div>
-            <div class="field full"><textarea id="invoiceNotes" placeholder="Thank you for your business! Payment due within 14 days."></textarea></div>
+            <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">sticky_note_2</span><h3>Notes</h3></div></div>
+            <div class="field full"><label for="invoiceNotes" class="sr-only">Notes</label><textarea id="invoiceNotes" placeholder="Thank you for your business! Payment due within 14 days."></textarea></div>
           </div>
         </div>
 
-        <div class="invoice-preview" id="invoicePreview">
-          <div class="prev-head">
-            <div style="display:flex;gap:14px;align-items:center;">
-              <img class="prev-logo" id="prevLogo" src="" alt="" style="display:none;">
-              <div>
-                <h2 id="prevCompanyName">Your Company</h2>
-                <div style="font-size:12.5px;color:#888;" id="prevCompanyMeta">company@email.com</div>
+        <div class="preview-col">
+          <div class="preview-label"><span class="live" aria-hidden="true"></span>Live preview</div>
+          <div class="invoice-preview" id="invoicePreview">
+            <div class="inv-band">
+              <div class="inv-brand">
+                <img class="prev-logo" id="prevLogo" src="" alt="" style="display:none;" crossorigin="anonymous">
+                <div>
+                  <h2 id="prevCompanyName">Your Company</h2>
+                  <div class="inv-company-meta" id="prevCompanyMeta">company@email.com</div>
+                </div>
+              </div>
+              <div class="inv-id">
+                <span class="inv-kicker">Invoice</span>
+                <b id="prevInvoiceNumber">LS-0001</b>
+                <span class="prev-badge" id="prevStatusBadge">Draft</span>
               </div>
             </div>
-            <div class="prev-meta">
-              <div><b id="prevInvoiceNumber">LS-0001</b></div>
-              <div>Issued: <span id="prevIssueDate">—</span></div>
-              <div>Due: <span id="prevDueDate">—</span></div>
-              <span class="prev-badge" id="prevStatusBadge">Draft</span>
+
+            <div class="inv-tiles">
+              <div class="inv-tile"><span>Issued</span><b id="prevIssueDate">—</b></div>
+              <div class="inv-tile"><span>Due</span><b id="prevDueDate">—</b></div>
+              <div class="inv-tile due"><span>Amount due</span><b id="prevAmountDue">₦0.00</b></div>
             </div>
-          </div>
 
-          <div class="prev-parties">
-            <div>
-              <h5>From</h5>
-              <p id="prevFromAddress">Your company address</p>
+            <div class="prev-parties">
+              <div>
+                <h5>From</h5>
+                <p id="prevFromAddress">Your company address</p>
+              </div>
+              <div>
+                <h5>Bill to</h5>
+                <p id="prevClientBlock">Client name<br>Client address</p>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <h5>Bill to</h5>
-              <p id="prevClientBlock">Client name<br>Client address</p>
+
+            <table>
+              <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th style="text-align:right;">Amount</th></tr></thead>
+              <tbody id="prevLineItems"></tbody>
+            </table>
+
+            <div class="prev-totals">
+              <div class="row"><span>Subtotal</span><span id="prevSubtotal">$0.00</span></div>
+              <div class="row"><span>Discount</span><span id="prevDiscount">-$0.00</span></div>
+              <div class="row"><span>Tax</span><span id="prevTax">+$0.00</span></div>
+              <div class="row grand"><span>Balance due</span><span id="prevTotal">$0.00</span></div>
             </div>
+
+            <div class="prev-bank" id="prevBankBlock">
+              <h5>Payment details</h5>
+              <div id="prevBankDetails">No bank details saved yet.</div>
+            </div>
+
+            <div class="prev-notes" id="prevNotes"></div>
+            <div class="inv-foot"><span>Please pay by the due date shown above.</span><span class="mark"><i></i>Made with Ledger Studio</span></div>
           </div>
-
-          <table>
-            <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th style="text-align:right;">Amount</th></tr></thead>
-            <tbody id="prevLineItems"></tbody>
-          </table>
-
-          <div class="prev-totals">
-            <div class="row"><span>Subtotal</span><span id="prevSubtotal">$0.00</span></div>
-            <div class="row"><span>Discount</span><span id="prevDiscount">-$0.00</span></div>
-            <div class="row"><span>Tax</span><span id="prevTax">+$0.00</span></div>
-            <div class="row grand"><span>Total</span><span id="prevTotal">$0.00</span></div>
-          </div>
-
-          <div class="prev-bank" id="prevBankBlock">
-            <h5>Payment details</h5>
-            <div id="prevBankDetails">No bank details saved yet.</div>
-          </div>
-
-          <div class="prev-notes" id="prevNotes"></div>
         </div>
       </div>
     </section>
 
     <!-- COMPANY SETTINGS -->
-    <section class="view" id="view-company">
+    <section class="view" id="view-company" aria-labelledby="companyTitle">
       <div class="app-topbar">
         <div>
-          <h1>Company Details</h1>
+          <h1 id="companyTitle">Company details</h1>
           <p>This information appears on every invoice you create.</p>
         </div>
       </div>
-      <div class="panel" style="max-width:640px;">
-        <div class="panel-head"><h3>Logo</h3></div>
-        <div class="logo-upload" id="logoUpload">
-          <div class="logo-preview" id="logoPreview"><svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
-          <div class="logo-upload-text">
-            <b>Click or drag a logo here</b>
-            <span>PNG, JPG or SVG. Square logos look best.</span>
+      <div class="settings-wrap">
+        <div class="panel">
+          <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">image</span><div><h3>Logo</h3><div class="sub">Shown at the top of every invoice</div></div></div></div>
+          <div class="logo-upload" id="logoUpload" role="button" tabindex="0" aria-label="Upload company logo">
+            <div class="logo-preview" id="logoPreview"><span class="ms" aria-hidden="true">add_photo_alternate</span></div>
+            <div class="logo-upload-text">
+              <b>Click or drag a logo here</b>
+              <span>PNG, JPG or SVG. Square logos look best.</span>
+            </div>
+            <input type="file" id="logoInput" accept="image/*" style="display:none;">
           </div>
-          <input type="file" id="logoInput" accept="image/*" style="display:none;">
-        </div>
-        <div style="margin-top:12px;" id="removeLogoWrap">
-          <button class="btn btn-ghost btn-sm" id="removeLogoBtn">Remove logo</button>
+          <div style="margin-top:12px;" id="removeLogoWrap">
+            <button class="btn btn-ghost btn-sm" id="removeLogoBtn"><span class="ms" aria-hidden="true">delete</span>Remove logo</button>
+          </div>
         </div>
 
-        <div class="panel-head" style="margin-top:28px;"><h3>Company info</h3></div>
-        <div class="form-grid">
-          <div class="field full"><label>Company / brand name</label><input type="text" id="companyName" placeholder="Bright Studio Co."></div>
-          <div class="field"><label>Email</label><input type="email" id="companyEmail" placeholder="hello@brightstudio.com"></div>
-          <div class="field"><label>Phone</label><input type="text" id="companyPhone" placeholder="+234 800 000 0000"></div>
-          <div class="field full"><label>Business address</label><textarea id="companyAddress" placeholder="12 Studio Lane, Lagos, Nigeria"></textarea></div>
+        <div class="panel">
+          <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">storefront</span><div><h3>Company info</h3><div class="sub">Your name and contact details</div></div></div></div>
+          <div class="form-grid">
+            <div class="field full"><label for="companyName">Company / brand name</label><input type="text" id="companyName" placeholder="Bright Studio Co."></div>
+            <div class="field"><label for="companyEmail">Email</label><input type="email" id="companyEmail" placeholder="hello@brightstudio.com"></div>
+            <div class="field"><label for="companyPhone">Phone</label><input type="text" id="companyPhone" placeholder="+234 800 000 0000"></div>
+            <div class="field full"><label for="companyAddress">Business address</label><textarea id="companyAddress" placeholder="12 Studio Lane, Lagos, Nigeria"></textarea></div>
+          </div>
+          <button class="btn btn-primary" id="saveCompanyBtn">Save company details</button>
         </div>
-        <button class="btn btn-primary" id="saveCompanyBtn">Save company details</button>
       </div>
     </section>
 
     <!-- BANK SETTINGS -->
-    <section class="view" id="view-bank">
+    <section class="view" id="view-bank" aria-labelledby="bankTitle">
       <div class="app-topbar">
         <div>
-          <h1>Bank Details</h1>
+          <h1 id="bankTitle">Bank details</h1>
           <p>Saved once, shown automatically on every invoice.</p>
         </div>
       </div>
-      <div class="panel" style="max-width:640px;">
-        <div class="form-grid">
-          <div class="field full"><label>Bank name</label><input type="text" id="bankName" placeholder="First Atlantic Bank"></div>
-          <div class="field"><label>Account holder name</label><input type="text" id="accountName" placeholder="Bright Studio Co."></div>
-          <div class="field"><label>Account number</label><input type="text" id="accountNumber" placeholder="0123456789"></div>
-          <div class="field"><label>IBAN <span class="hint">(optional)</span></label><input type="text" id="iban" placeholder="GB29 NWBK 6016 1331 9268 19"></div>
-          <div class="field"><label>SWIFT / BIC <span class="hint">(optional)</span></label><input type="text" id="swift" placeholder="NWBKGB2L"></div>
+      <div class="settings-wrap">
+        <div class="panel">
+          <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">account_balance</span><div><h3>Payment account</h3><div class="sub">Where clients should send money</div></div></div></div>
+          <div class="form-grid">
+            <div class="field full"><label for="bankName">Bank name</label><input type="text" id="bankName" placeholder="First Atlantic Bank"></div>
+            <div class="field"><label for="accountName">Account holder name</label><input type="text" id="accountName" placeholder="Bright Studio Co."></div>
+            <div class="field"><label for="accountNumber">Account number</label><input type="text" id="accountNumber" placeholder="0123456789" inputmode="numeric"></div>
+            <div class="field"><label for="iban">IBAN <span class="hint">(optional)</span></label><input type="text" id="iban" placeholder="GB29 NWBK 6016 1331 9268 19"></div>
+            <div class="field"><label for="swift">SWIFT / BIC <span class="hint">(optional)</span></label><input type="text" id="swift" placeholder="NWBKGB2L"></div>
+          </div>
+          <button class="btn btn-primary" id="saveBankBtn">Save bank details</button>
         </div>
-        <button class="btn btn-primary" id="saveBankBtn">Save bank details</button>
       </div>
     </section>
 
     <!-- PROFILE -->
-    <section class="view" id="view-profile">
+    <section class="view" id="view-profile" aria-labelledby="profileTitle">
       <div class="app-topbar">
         <div>
-          <h1>Profile</h1>
+          <h1 id="profileTitle">Profile</h1>
           <p>Manage your account.</p>
         </div>
       </div>
 
-      <div class="panel" style="max-width:640px;">
-        <div class="profile-head">
-          <div class="avatar-upload" id="profileAvatarUpload">
-            <div class="avatar lg" id="profileAvatar">U</div>
-            <div class="edit-badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-            <input type="file" id="profileAvatarInput" accept="image/*" style="display:none;">
-          </div>
-          <div>
-            <h3 id="profileNameDisplay">Your name</h3>
-            <p style="margin-top:4px;" id="profileEmailDisplay">you@studio.com</p>
-          </div>
-        </div>
-
-        <div class="panel-head" style="margin-top:26px;"><h3>Account details</h3></div>
-        <div class="form-grid">
-          <div class="field full"><label>Full name</label><input type="text" id="profileName" placeholder="Your name"></div>
-          <div class="field full"><label>Email</label><input type="email" id="profileEmail" placeholder="you@studio.com"></div>
-        </div>
-        <button class="btn btn-primary btn-sm" id="saveProfileBtn">Save profile</button>
-
-        <div class="panel-head" style="margin-top:34px;"><h3>Change password</h3></div>
-        <div class="form-grid">
-          <div class="field"><label>Current password</label>
-            <div class="password-wrap">
-              <input type="password" id="currentPassword">
-              <button type="button" class="pw-toggle" data-target="currentPassword" aria-label="Show password"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <div class="settings-wrap">
+        <div class="panel">
+          <div class="profile-head">
+            <div class="avatar-upload" id="profileAvatarUpload" role="button" tabindex="0" aria-label="Change profile photo">
+              <div class="avatar lg" id="profileAvatar">U</div>
+              <div class="edit-badge"><span class="ms" aria-hidden="true">photo_camera</span></div>
+              <input type="file" id="profileAvatarInput" accept="image/*" style="display:none;">
+            </div>
+            <div>
+              <h3 id="profileNameDisplay">Your name</h3>
+              <p style="margin-top:4px;" id="profileEmailDisplay">you@studio.com</p>
             </div>
           </div>
-          <div class="field"><label>New password</label>
-            <div class="password-wrap">
-              <input type="password" id="newPassword" placeholder="At least 6 characters">
-              <button type="button" class="pw-toggle" data-target="newPassword" aria-label="Show password"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+
+          <div class="divider"></div>
+          <div class="panel-head"><h3>Account details</h3></div>
+          <div class="form-grid">
+            <div class="field full"><label for="profileName">Full name</label><input type="text" id="profileName" placeholder="Your name" autocomplete="name"></div>
+            <div class="field full"><label for="profileEmail">Email</label><input type="email" id="profileEmail" placeholder="you@studio.com" autocomplete="email"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="saveProfileBtn">Save profile</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">lock</span><div><h3>Change password</h3><div class="sub">Use at least 6 characters</div></div></div></div>
+          <div class="form-grid">
+            <div class="field"><label for="currentPassword">Current password</label>
+              <div class="password-wrap">
+                <input type="password" id="currentPassword" autocomplete="current-password">
+                <button type="button" class="pw-toggle" data-target="currentPassword" aria-label="Show password"><span class="ms" aria-hidden="true">visibility</span></button>
+              </div>
+            </div>
+            <div class="field"><label for="newPassword">New password</label>
+              <div class="password-wrap">
+                <input type="password" id="newPassword" placeholder="At least 6 characters" autocomplete="new-password">
+                <button type="button" class="pw-toggle" data-target="newPassword" aria-label="Show password"><span class="ms" aria-hidden="true">visibility</span></button>
+              </div>
             </div>
           </div>
+          <button class="btn btn-ghost btn-sm" id="changePasswordBtn">Update password</button>
         </div>
-        <button class="btn btn-ghost btn-sm" id="changePasswordBtn">Update password</button>
 
-        <div class="panel-head" style="margin-top:34px;"><h3>Account actions</h3></div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" id="profileLogoutBtn">Log out</button>
-          <button class="btn btn-danger btn-sm" id="deleteAccountBtn">Delete account</button>
+        <div class="panel">
+          <div class="panel-head"><div class="title-ic"><span class="ms" aria-hidden="true">manage_accounts</span><div><h3>Account actions</h3><div class="sub">Sign out, or permanently clear your data</div></div></div></div>
+          <div class="form-actions">
+            <button class="btn btn-ghost btn-sm" id="profileLogoutBtn"><span class="ms" aria-hidden="true">logout</span>Log out</button>
+            <button class="btn btn-danger btn-sm" id="deleteAccountBtn"><span class="ms" aria-hidden="true">delete_forever</span>Delete account</button>
+          </div>
         </div>
       </div>
     </section>
@@ -465,8 +541,9 @@
 
 <!-- Delete confirmation modal -->
 <div class="modal-overlay" id="deleteModal">
-  <div class="modal">
-    <h3>Delete this invoice?</h3>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="m-ic danger" aria-hidden="true"><span class="ms">delete</span></div>
+    <h3 id="deleteModalTitle">Delete this invoice?</h3>
     <p>This can't be undone. The invoice will be permanently removed from your records.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="cancelDeleteBtn">Cancel</button>
@@ -477,19 +554,20 @@
 
 <!-- Share invoice modal -->
 <div class="modal-overlay" id="shareModal">
-  <div class="modal" style="max-width:520px;">
-    <h3>Share this invoice</h3>
-    <p>Anyone with this link can view a read-only version of this invoice — no account needed. The link works once this site is live at a public URL.</p>
+  <div class="modal" style="max-width:540px;" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="m-ic" aria-hidden="true"><span class="ms">link</span></div>
+    <h3 id="shareModalTitle">Share this invoice</h3>
+    <p>Anyone with this link can view a read-only version of this invoice, with no account needed. The link works once this site is live at a public URL.</p>
     <div class="share-link-box">
-      <input type="text" id="shareLinkInput" readonly>
+      <input type="text" id="shareLinkInput" readonly aria-label="Shareable invoice link">
       <button class="btn btn-primary btn-sm" id="copyShareLinkBtn">Copy</button>
     </div>
     <div class="share-options">
-      <button class="btn btn-ghost btn-sm" id="nativeShareBtn"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg> Share via device</button>
-      <a class="btn btn-ghost btn-sm" id="whatsappShareBtn" target="_blank">WhatsApp</a>
-      <a class="btn btn-ghost btn-sm" id="emailShareBtn">Email</a>
+      <button class="btn btn-ghost btn-sm" id="nativeShareBtn"><span class="ms" aria-hidden="true">ios_share</span>Share via device</button>
+      <a class="btn btn-ghost btn-sm" id="whatsappShareBtn" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">chat</span>WhatsApp</a>
+      <a class="btn btn-ghost btn-sm" id="emailShareBtn"><span class="ms" aria-hidden="true">mail</span>Email</a>
     </div>
-    <p class="link-warning">Tip: keep your logo small — very large logos make the link long. For unlimited-size sharing later, this would need a small backend to host the invoice data.</p>
+    <p class="link-warning">Your logo and item photos are stored securely in your account, so this link stays short no matter how many photos the invoice has.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="closeShareModalBtn">Close</button>
     </div>
@@ -498,9 +576,10 @@
 
 <!-- Delete account confirmation -->
 <div class="modal-overlay" id="deleteAccountModal">
-  <div class="modal">
-    <h3>Clear your data?</h3>
-    <p>This permanently deletes your saved company details, bank details, and every invoice from your account, then signs you out. Your login itself stays active — contact support if you also want the login removed.</p>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteAccountTitle">
+    <div class="m-ic danger" aria-hidden="true"><span class="ms">warning</span></div>
+    <h3 id="deleteAccountTitle">Clear your data?</h3>
+    <p>This permanently deletes your saved company details, bank details, and every invoice from your account, then signs you out. Your login itself stays active. Contact support if you also want the login removed.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="cancelDeleteAccountBtn">Cancel</button>
       <button class="btn btn-danger btn-sm" id="confirmDeleteAccountBtn">Delete my data</button>
@@ -508,7 +587,7 @@
   </div>
 </div>
 
-<div class="toast-wrap" id="toastWrap"></div>
+<div class="toast-wrap" id="toastWrap" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

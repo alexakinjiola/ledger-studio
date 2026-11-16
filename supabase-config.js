@@ -326,5 +326,38 @@ const SUPABASE_ANON_KEY = "sb_publishable_Nzxw-dAc_S9otrNboi2_7A_7vgPs3Wm";
 
   function from(table){ return new QueryBuilder(table); }
 
-  window.supabaseClient = { auth, from };
+  /* ---------------- Storage ----------------
+     Item photos and logos live in the public "invoice-images" bucket,
+     inside a folder named after the signed-in user's id. Invoices and
+     share links then carry a short URL instead of the whole image. */
+  const STORAGE_URL = SUPABASE_URL.replace(/\/$/, "") + "/storage/v1";
+  const storage = {
+    publicUrl(bucket, path){
+      return STORAGE_URL + "/object/public/" + bucket + "/" + path;
+    },
+    async upload(bucket, path, blob){
+      try{
+        const token = await getBearerToken();
+        const res = await fetch(STORAGE_URL + "/object/" + bucket + "/" + path, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + token,
+            "Content-Type": blob.type || "application/octet-stream",
+            "Cache-Control": "max-age=31536000"
+          },
+          body: blob
+        });
+        if(!res.ok){
+          const json = await parseResponse(res);
+          return { data: null, error: { message: (json && (json.message || json.error)) || ("Upload failed (" + res.status + ")") } };
+        }
+        return { data: { path, publicUrl: storage.publicUrl(bucket, path) }, error: null };
+      }catch(e){
+        return { data: null, error: toNetworkError(e) };
+      }
+    }
+  };
+
+  window.supabaseClient = { auth, from, storage };
 })();

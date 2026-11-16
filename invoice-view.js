@@ -35,16 +35,27 @@
   function render(data){
     const container = document.getElementById("invoiceContainer");
     const symbol = data.currency || "₦";
-    const colors = {paid:["#e6f4e6","#046C04"], unpaid:["#fdf3d9","#9a6b00"], draft:["#eee","#777"]};
+    const colors = {paid:["#E2F5EB","#0B7A44"], unpaid:["#FFF1D9","#8F5600"], draft:["#EEF0F6","#45486A"]};
     const statusColor = colors[data.status] || colors.draft;
 
-    const itemsHtml = (data.items || []).map(item => `
+    // Images arrive via the URL, so only accept our own compressed data URLs
+    // or files from this app's public Supabase Storage bucket.
+    const SAFE_DATA_IMG = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+    const SAFE_STORAGE_IMG = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/invoice-images\/[A-Za-z0-9/_.-]+$/;
+    const safeImg = (src)=> (typeof src === "string" && (SAFE_DATA_IMG.test(src) || SAFE_STORAGE_IMG.test(src))) ? src : "";
+    const logo = safeImg(data.companyLogo);
+
+    const itemsHtml = (data.items || []).map(item => {
+      const img = safeImg(item.image);
+      const desc = escapeHtml(item.desc || "Untitled item");
+      return `
       <tr>
-        <td>${escapeHtml(item.desc || "Untitled item")}</td>
+        <td>${img ? `<div class="item-cell"><img class="item-img" src="${img}" alt="" crossorigin="anonymous"><span>${desc}</span></div>` : desc}</td>
         <td>${item.qty}</td>
         <td>${fmtMoney(item.rate, symbol)}</td>
         <td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
 
     const bankHtml = (data.bank && (data.bank.accountNumber || data.bank.bankName)) ? `
       ${data.bank.bankName ? "Bank: " + escapeHtml(data.bank.bankName) + "<br>" : ""}
@@ -55,21 +66,26 @@
     ` : "No bank details were provided.";
 
     container.innerHTML = `
-      <div class="invoice-preview" id="invoicePreview" style="position:static;">
-        <div class="prev-head">
-          <div style="display:flex;gap:14px;align-items:center;">
-            ${data.companyLogo ? `<img class="prev-logo" src="${data.companyLogo}" alt="">` : ""}
+      <div class="invoice-preview" id="invoicePreview">
+        <div class="inv-band">
+          <div class="inv-brand">
+            ${logo ? `<img class="prev-logo" src="${logo}" alt="" crossorigin="anonymous">` : ""}
             <div>
               <h2>${escapeHtml(data.companyName || "Company")}</h2>
-              <div style="font-size:12.5px;color:#888;">${escapeHtml([data.companyEmail, data.companyPhone].filter(Boolean).join(" · "))}</div>
+              <div class="inv-company-meta">${escapeHtml([data.companyEmail, data.companyPhone].filter(Boolean).join(" · "))}</div>
             </div>
           </div>
-          <div class="prev-meta">
-            <div><b>${escapeHtml(data.number || "")}</b></div>
-            <div>Issued: ${fmtDate(data.issueDate)}</div>
-            <div>Due: ${fmtDate(data.dueDate)}</div>
+          <div class="inv-id">
+            <span class="inv-kicker">Invoice</span>
+            <b>${escapeHtml(data.number || "")}</b>
             <span class="prev-badge" style="background:${statusColor[0]};color:${statusColor[1]};">${(data.status||"draft").replace(/^./, c=>c.toUpperCase())}</span>
           </div>
+        </div>
+
+        <div class="inv-tiles">
+          <div class="inv-tile"><span>Issued</span><b>${fmtDate(data.issueDate)}</b></div>
+          <div class="inv-tile"><span>Due</span><b>${fmtDate(data.dueDate)}</b></div>
+          <div class="inv-tile due"><span>Amount due</span><b>${fmtMoney(data.total, symbol)}</b></div>
         </div>
 
         <div class="prev-parties">
@@ -77,9 +93,9 @@
             <h5>From</h5>
             <p>${escapeHtml(data.companyAddress || "")}</p>
           </div>
-          <div style="text-align:right;">
+          <div>
             <h5>Bill to</h5>
-            <p>${escapeHtml(data.clientName || "")}${data.clientAddress ? "<br>" + escapeHtml(data.clientAddress).replace(/\n/g,"<br>") : ""}</p>
+            <p><b>${escapeHtml(data.clientName || "")}</b>${data.clientAddress ? "<br>" + escapeHtml(data.clientAddress).replace(/\n/g,"<br>") : ""}</p>
           </div>
         </div>
 
@@ -92,7 +108,7 @@
           <div class="row"><span>Subtotal</span><span>${fmtMoney(data.subtotal, symbol)}</span></div>
           <div class="row"><span>Discount</span><span>-${fmtMoney(data.discountAmt, symbol)}</span></div>
           <div class="row"><span>Tax</span><span>+${fmtMoney(data.taxAmt, symbol)}</span></div>
-          <div class="row grand"><span>Total</span><span>${fmtMoney(data.total, symbol)}</span></div>
+          <div class="row grand"><span>Balance due</span><span>${fmtMoney(data.total, symbol)}</span></div>
         </div>
 
         <div class="prev-bank">
@@ -101,6 +117,7 @@
         </div>
 
         ${data.notes ? `<div class="prev-notes">${escapeHtml(data.notes)}</div>` : ""}
+        <div class="inv-foot"><span>Please pay by the due date shown above.</span><span class="mark"><i></i>Made with Ledger Studio</span></div>
       </div>`;
 
     document.getElementById("publicActions").style.display = "flex";
@@ -114,13 +131,24 @@
     document.getElementById("printBtn").addEventListener("click", ()=> window.print());
     document.getElementById("downloadPdfBtn").addEventListener("click", async ()=>{
       const el = document.getElementById("invoicePreview");
-      const canvas = await html2canvas(el, {scale:2, backgroundColor:"#ffffff"});
-      const imgData = canvas.toDataURL("image/png");
+      const canvas = await html2canvas(el, {
+        scale:2, backgroundColor:"#ffffff", windowWidth:1200, useCORS:true,
+        onclone:(doc)=>{ doc.getElementById("invoicePreview").classList.add("pdf-mode"); }
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.92);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF("p","mm","a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const imgHeight = (canvas.height * pageWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
+      // Long invoices continue onto extra A4 pages instead of being cut off
+      let offset = 0;
+      pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, imgHeight, "invoice", "FAST");
+      while(imgHeight - offset > pageHeight + 1){
+        offset += pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, -offset, pageWidth, imgHeight, "invoice", "FAST");
+      }
       pdf.save((data.number || "invoice") + ".pdf");
     });
   } else {

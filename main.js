@@ -40,10 +40,11 @@
   }
   function setBusy(btn, busyText){
     if(!btn) return ()=>{};
-    const original = btn.textContent;
+    const original = btn.innerHTML;
     btn.textContent = busyText;
     btn.disabled = true;
-    return ()=>{ btn.textContent = original; btn.disabled = false; };
+    btn.setAttribute("aria-busy", "true");
+    return ()=>{ btn.innerHTML = original; btn.disabled = false; btn.removeAttribute("aria-busy"); };
   }
   function friendlyError(error){
     if(!error) return "Something went wrong. Please try again.";
@@ -429,7 +430,9 @@
       col.className = "bar-col";
       const bar = document.createElement("div");
       bar.className = "bar";
-      col.innerHTML = `<b>${fmtMoney(totals[idx]).replace(".00","")}</b>`;
+      const sym = fmtMoney(0).replace(/[\d.,\s-]/g, "");
+      const compact = new Intl.NumberFormat(undefined, {notation:"compact", maximumFractionDigits:1}).format(totals[idx]);
+      col.innerHTML = `<b title="${fmtMoney(totals[idx])}">${sym}${compact}</b>`;
       col.appendChild(bar);
       const label = document.createElement("span");
       label.textContent = m.label;
@@ -498,8 +501,8 @@
         <td class="mono">${fmtMoney(inv.total, inv.currency)}</td>
         <td>
           <div class="row-actions">
-            <button class="icon-btn" title="Edit" data-edit="${inv.id}"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-            <button class="icon-btn del" title="Delete" data-del="${inv.id}"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            <button class="icon-btn" title="Edit" aria-label="Edit invoice ${escapeHtml(inv.number)}" data-edit="${inv.id}"><span class="ms" aria-hidden="true">edit</span></button>
+            <button class="icon-btn del" title="Delete" aria-label="Delete invoice ${escapeHtml(inv.number)}" data-del="${inv.id}"><span class="ms" aria-hidden="true">delete</span></button>
           </div>
         </td>`;
       body.appendChild(tr);
@@ -557,17 +560,132 @@
   /* =========================================================
      EDITOR — line items, calculations, preview
   ========================================================= */
+  const IMAGE_BUCKET = "invoice-images";
+  // Accept our own compressed data URLs (older invoices / offline fallback)
+  // or public files from this app's Supabase Storage bucket. Nothing else.
+  const SAFE_DATA_IMG = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+  const SAFE_STORAGE_IMG = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/invoice-images\/[A-Za-z0-9/_.-]+$/;
+  const safeImg = (src)=> (typeof src === "string" && (SAFE_DATA_IMG.test(src) || SAFE_STORAGE_IMG.test(src))) ? src : "";
+
+  // Shrink an image in the browser before it is uploaded or saved.
+  // Returns both a data URL (instant preview / fallback) and a Blob (for upload).
+  function compressImage(file, {max = 256, type = "image/jpeg", quality = 0.8} = {}){
+    return new Promise((resolve, reject)=>{
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = ()=>{
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if(type === "image/jpeg"){ ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h); } // white behind transparent PNGs
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        const dataUrl = canvas.toDataURL(type, quality);
+        canvas.toBlob(blob => blob ? resolve({dataUrl, blob}) : reject(new Error("Encode failed")), type, quality);
+      };
+      img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error("Unreadable image")); };
+      img.src = url;
+    });
+  }
+
+  // Uploads in flight; save and share wait for these so they never capture a half-done photo.
+  const pendingUploads = new Set();
+  function trackUpload(promise){
+    pendingUploads.add(promise);
+    promise.finally(()=> pendingUploads.delete(promise));
+    return promise;
+  }
+  async function waitForUploads(){
+    while(pendingUploads.size){ await Promise.allSettled([...pendingUploads]); }
+  }
+
+  // Upload to Supabase Storage under <user id>/<folder>/. Returns the public URL, or "" on failure.
+  async function uploadImage(blob, folder){
+    if(!currentUser || !supa.storage) return "";
+    const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+    const name = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10) + "." + ext;
+    const { data, error } = await supa.storage.upload(IMAGE_BUCKET, currentUser.id + "/" + folder + "/" + name, blob);
+    if(error){ console.error("Image upload failed:", error.message); return ""; }
+    return data.publicUrl;
+  }
+
+  function paintItemPhoto(row){
+    const slot = row.querySelector(".li-photo");
+    const clear = row.querySelector(".li-photo-clear");
+    if(row._image){
+      slot.innerHTML = `<img src="${row._image}" alt="" crossorigin="anonymous">`;
+      slot.classList.add("has-img");
+      slot.setAttribute("aria-label", "Change photo for this item");
+      clear.hidden = false;
+    } else {
+      slot.innerHTML = '<span class="ms" aria-hidden="true">add_photo_alternate</span>';
+      slot.classList.remove("has-img");
+      slot.setAttribute("aria-label", "Add a photo for this item");
+      clear.hidden = true;
+    }
+  }
+
+  async function setItemPhoto(row, file){
+    if(!file) return;
+    if(!file.type.startsWith("image/")){ toast("Please choose an image file", "error"); return; }
+    if(file.size > 10 * 1024 * 1024){ toast("Photo should be under 10MB", "error"); return; }
+    let compressed;
+    try{
+      compressed = await compressImage(file, {max:256, type:"image/jpeg", quality:0.8});
+    }catch(err){
+      toast("Couldn't read that image, try another", "error");
+      return;
+    }
+    // Show it straight away, then swap in the short Storage URL once uploaded.
+    const uploadId = Symbol("upload");
+    row._uploadId = uploadId;
+    row._image = compressed.dataUrl;
+    row.classList.add("uploading");
+    paintItemPhoto(row);
+    recalc();
+
+    const url = await trackUpload(uploadImage(compressed.blob, "items"));
+    if(row._uploadId !== uploadId) return;          // replaced or removed meanwhile
+    row.classList.remove("uploading");
+    if(url){
+      row._image = url;
+      paintItemPhoto(row);
+      recalc();
+    } else {
+      toast("Photo kept inside the invoice — upload didn't go through", "error");
+    }
+  }
+
   function newLineItemRow(item){
     const row = document.createElement("div");
     row.className = "line-item";
     row.innerHTML = `
-      <input type="text" class="li-desc" placeholder="Description of work" value="${escapeHtml(item?.desc || "")}">
-      <input type="number" class="li-qty" placeholder="Qty" min="0" value="${item?.qty ?? 1}">
-      <input type="number" class="li-rate" placeholder="Rate" min="0" value="${item?.rate ?? 0}">
+      <div class="li-photo-wrap">
+        <button type="button" class="li-photo" title="Item photo"></button>
+        <button type="button" class="li-photo-clear" aria-label="Remove photo" title="Remove photo" hidden><span class="ms" aria-hidden="true">close</span></button>
+        <input type="file" class="li-photo-input" accept="image/*" hidden>
+      </div>
+      <input type="text" class="li-desc" placeholder="Description of work" aria-label="Description" value="${escapeHtml(item?.desc || "")}">
+      <input type="number" class="li-qty" placeholder="Qty" aria-label="Quantity" min="0" value="${item?.qty ?? 1}">
+      <input type="number" class="li-rate" placeholder="Rate" aria-label="Rate" min="0" value="${item?.rate ?? 0}">
       <div class="amt">₦0.00</div>
-      <button class="icon-btn del li-remove" title="Remove"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
-    row.querySelectorAll("input").forEach(inp=> inp.addEventListener("input", recalc));
+      <button class="icon-btn del li-remove" title="Remove" aria-label="Remove line item"><span class="ms" aria-hidden="true">close</span></button>`;
+    row.querySelectorAll("input:not([type=file])").forEach(inp=> inp.addEventListener("input", recalc));
     row.querySelector(".li-remove").addEventListener("click", ()=>{ row.remove(); recalc(); });
+
+    row._image = safeImg(item?.image);
+    const slot = row.querySelector(".li-photo");
+    const fileInput = row.querySelector(".li-photo-input");
+    slot.addEventListener("click", ()=> fileInput.click());
+    fileInput.addEventListener("change", ()=>{ setItemPhoto(row, fileInput.files[0]); fileInput.value = ""; });
+    row.querySelector(".li-photo-clear").addEventListener("click", ()=>{ row._uploadId = null; row.classList.remove("uploading"); row._image = ""; paintItemPhoto(row); recalc(); slot.focus(); });
+    ["dragenter","dragover"].forEach(evt=> slot.addEventListener(evt, e=>{ e.preventDefault(); slot.classList.add("dragover"); }));
+    ["dragleave","drop"].forEach(evt=> slot.addEventListener(evt, e=>{ e.preventDefault(); slot.classList.remove("dragover"); }));
+    slot.addEventListener("drop", e=> setItemPhoto(row, e.dataTransfer.files[0]));
+    paintItemPhoto(row);
     return row;
   }
 
@@ -581,7 +699,9 @@
       const desc = row.querySelector(".li-desc").value;
       const qty = Math.max(0, Number(row.querySelector(".li-qty").value) || 0);
       const rate = Math.max(0, Number(row.querySelector(".li-rate").value) || 0);
-      return {desc, qty, rate};
+      const item = {desc, qty, rate};
+      if(row._image) item.image = row._image;
+      return item;
     });
   }
 
@@ -628,20 +748,24 @@
     const status = document.getElementById("invoiceStatus").value;
     const badge = document.getElementById("prevStatusBadge");
     badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-    const colors = {paid:["#e6f4e6","#046C04"], unpaid:["#fdf3d9","#9a6b00"], draft:["#eee","#777"]};
+    const colors = {paid:["#E2F5EB","#0B7A44"], unpaid:["#FFF1D9","#8F5600"], draft:["#EEF0F6","#45486A"]};
     badge.style.background = colors[status][0];
     badge.style.color = colors[status][1];
 
     const clientName = document.getElementById("clientName").value || "Client name";
     const clientAddress = document.getElementById("clientAddress").value || "";
-    document.getElementById("prevClientBlock").innerHTML = escapeHtml(clientName) + (clientAddress ? "<br>" + escapeHtml(clientAddress).replace(/\n/g,"<br>") : "");
+    document.getElementById("prevClientBlock").innerHTML = "<b>" + escapeHtml(clientName) + "</b>" + (clientAddress ? "<br>" + escapeHtml(clientAddress).replace(/\n/g,"<br>") : "");
 
     const tbody = document.getElementById("prevLineItems");
     tbody.innerHTML = "";
     calc.items.forEach(item=>{
-      if(!item.desc && !item.qty && !item.rate) return;
+      if(!item.desc && !item.qty && !item.rate && !item.image) return;
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${escapeHtml(item.desc || "Untitled item")}</td><td>${item.qty}</td><td>${fmtMoney(item.rate, symbol)}</td><td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>`;
+      const img = safeImg(item.image);
+      const descCell = img
+        ? `<div class="item-cell"><img class="item-img" src="${img}" alt="" crossorigin="anonymous"><span>${escapeHtml(item.desc || "Untitled item")}</span></div>`
+        : escapeHtml(item.desc || "Untitled item");
+      tr.innerHTML = `<td>${descCell}</td><td>${item.qty}</td><td>${fmtMoney(item.rate, symbol)}</td><td style="text-align:right;">${fmtMoney(item.qty*item.rate, symbol)}</td>`;
       tbody.appendChild(tr);
     });
 
@@ -649,6 +773,8 @@
     document.getElementById("prevDiscount").textContent = "-" + fmtMoney(calc.discountAmt, symbol);
     document.getElementById("prevTax").textContent = "+" + fmtMoney(calc.taxAmt, symbol);
     document.getElementById("prevTotal").textContent = fmtMoney(calc.total, symbol);
+    const amountDue = document.getElementById("prevAmountDue");
+    if(amountDue) amountDue.textContent = fmtMoney(calc.total, symbol);
 
     const bankBlock = document.getElementById("prevBankDetails");
     if(bank.accountNumber || bank.bankName){
@@ -729,6 +855,11 @@
   }
 
   document.getElementById("saveInvoiceBtn").addEventListener("click", async ()=>{
+    if(pendingUploads.size){
+      const doneWaiting = setBusy(document.getElementById("saveInvoiceBtn"), "Uploading photos…");
+      await waitForUploads();
+      doneWaiting();
+    }
     const calc = recalc();
     const clientName = document.getElementById("clientName").value.trim();
     if(!clientName){
@@ -795,13 +926,24 @@
     const done = setBusy(document.getElementById("downloadPdfBtn"), "Generating…");
     try{
       const el = document.getElementById("invoicePreview");
-      const canvas = await html2canvas(el, {scale:2, backgroundColor:"#ffffff"});
-      const imgData = canvas.toDataURL("image/png");
+      const canvas = await html2canvas(el, {
+        scale:2, backgroundColor:"#ffffff", windowWidth:1200, useCORS:true,
+        onclone:(doc)=>{ doc.getElementById("invoicePreview").classList.add("pdf-mode"); }
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.92);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF("p","mm","a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const imgHeight = (canvas.height * pageWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
+      // Long invoices continue onto extra A4 pages instead of being cut off
+      let offset = 0;
+      pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, imgHeight, "invoice", "FAST");
+      while(imgHeight - offset > pageHeight + 1){
+        offset += pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, -offset, pageWidth, imgHeight, "invoice", "FAST");
+      }
       const number = document.getElementById("invoiceNumber").value.trim() || "invoice";
       pdf.save(number + ".pdf");
       toast("PDF downloaded");
@@ -813,7 +955,12 @@
 
   /* ---------------- Share link (editor) ---------------- */
   const shareModal = document.getElementById("shareModal");
-  document.getElementById("shareBtn").addEventListener("click", ()=>{
+  document.getElementById("shareBtn").addEventListener("click", async ()=>{
+    if(pendingUploads.size){
+      const doneWaiting = setBusy(document.getElementById("shareBtn"), "Uploading photos…");
+      await waitForUploads();
+      doneWaiting();
+    }
     const calc = recalc();
     const clientName = document.getElementById("clientName").value.trim();
     if(!clientName){ toast("Add a client name first", "error"); return; }
@@ -826,7 +973,7 @@
       dueDate: document.getElementById("dueDate").value,
       status: document.getElementById("invoiceStatus").value,
       currency: document.getElementById("currency").value,
-      items: calc.items.filter(it => it.desc || it.qty || it.rate),
+      items: calc.items.filter(it => it.desc || it.qty || it.rate || it.image),
       subtotal: calc.subtotal,
       discountAmt: calc.discountAmt,
       taxAmt: calc.taxAmt,
@@ -884,7 +1031,7 @@
   }
   function updateLogoPreview(){
     const preview = document.getElementById("logoPreview");
-    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : '<svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+    preview.innerHTML = company.logo ? `<img src="${company.logo}" alt="Company logo">` : '<span class="ms" aria-hidden="true">add_photo_alternate</span>';
   }
 
   const logoUpload = document.getElementById("logoUpload");
@@ -901,17 +1048,28 @@
     const file = e.dataTransfer.files[0];
     if(file) handleLogoFile(file);
   });
-  function handleLogoFile(file){
+  async function handleLogoFile(file){
     if(!file) return;
     if(!file.type.startsWith("image/")){ toast("Please upload an image file", "error"); return; }
-    if(file.size > 2 * 1024 * 1024){ toast("Logo should be under 2MB", "error"); return; }
-    const reader = new FileReader();
-    reader.onload = (e)=>{
-      company.logo = e.target.result;
+    if(file.size > 10 * 1024 * 1024){ toast("Logo should be under 10MB", "error"); return; }
+    let compressed;
+    try{
+      // PNG keeps transparent logos transparent
+      compressed = await compressImage(file, {max:400, type:"image/png"});
+    }catch(err){
+      toast("Couldn't read that image, try another", "error");
+      return;
+    }
+    company.logo = compressed.dataUrl;
+    updateLogoPreview();
+    const url = await trackUpload(uploadImage(compressed.blob, "logo"));
+    if(url){
+      company.logo = url;
       updateLogoPreview();
       toast("Logo added — remember to save");
-    };
-    reader.readAsDataURL(file);
+    } else {
+      toast("Logo added (stored inside your details) — remember to save");
+    }
   }
   document.getElementById("removeLogoBtn").addEventListener("click", ()=>{
     company.logo = "";
@@ -920,6 +1078,7 @@
 
   document.getElementById("saveCompanyBtn").addEventListener("click", async ()=>{
     const done = setBusy(document.getElementById("saveCompanyBtn"), "Saving…");
+    await waitForUploads();
     const next = {
       user_id: currentUser.id,
       name: document.getElementById("companyName").value.trim(),
