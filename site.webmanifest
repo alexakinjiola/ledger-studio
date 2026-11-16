@@ -1,0 +1,13 @@
+{
+  "name": "Ledger Studio",
+  "short_name": "Ledger",
+  "description": "Beautiful invoices, generated in seconds.",
+  "start_url": "app.html",
+  "display": "standalone",
+  "background_color": "#F3F4FA",
+  "theme_color": "#11122E",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
